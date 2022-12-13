@@ -1,3 +1,18 @@
+'''
+______________________________________________________________________________________________________________________________________________
+Copyright © 2022 Workflow Informatics - Distribution of this software without written permission of Workflow Informatics is prohibited.
+
+This SOFTWARE PRODUCT is provided by Workflow Informatics "as is" and "with all faults." 
+
+Workflow Informatics makes no representations or warranties of any kind concerning the safety, suitability, inaccuracies, typographical errors, or other harmful components of this SOFTWARE PRODUCT. 
+
+You are solely responsible for determining whether this SOFTWARE PRODUCT is compatible with your equipment and other software installed on your equipment.
+
+You are solely responsible for the protection of your equipment and backup of your data.
+
+Workflow Informatics will not be liable for any damages you may suffer in connection with using or modifying this SOFTWARE PRODUCT
+______________________________________________________________________________________________________________________________________________
+'''
 
 import base64
 import json
