@@ -12,6 +12,12 @@ You are solely responsible for the protection of your equipment and backup of yo
 
 Workflow Informatics will not be liable for any damages you may suffer in connection with using or modifying this SOFTWARE PRODUCT
 ______________________________________________________________________________________________________________________________________________
+
+This python library encompasses all of the API function calls provided by CDD Vault.
+
+If you're stuck, check out the Quickstart Guide
+
+
 '''
 
 import base64
@@ -22,6 +28,7 @@ import requests
 import pandas as pd
 import sys
 import time
+import datetime as dt
 
 
 class vaultClient(object):
@@ -31,6 +38,9 @@ class vaultClient(object):
         self.setVaultNumAndURL(vaultNum)
         self.setAPIKey(apiKey)
 
+    def __str__(self, vaultNum):
+
+        return f'Client for Vault ID: {vaultNum} instantiated {str(dt.datetime.now())}'
 
     def setVaultNumAndURL(self, vaultNum):
 
