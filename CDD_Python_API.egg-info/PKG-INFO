@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: CDD-Python-API
+Version: 0.1.5
+Summary: A python wrapper for all CDD Vault API function calls
+Author: Workflow Informatics Corp.
+Author-email: chris.lowden@workflowinformatics.com
