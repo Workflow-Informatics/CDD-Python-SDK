@@ -38,9 +38,9 @@ class vaultClient(object):
         self.setVaultNumAndURL(vaultNum)
         self.setAPIKey(apiKey)
 
-    def __str__(self, vaultNum):
+    def __str__(self):
 
-        return f'Client for Vault ID: {vaultNum} instantiated {str(dt.datetime.now())}'
+        return f'Client for Vault ID: {self.vaultNum} instantiated {str(dt.datetime.now())}'
 
     def setVaultNumAndURL(self, vaultNum):
 
@@ -355,7 +355,7 @@ class vaultClient(object):
         # Construct URL:
 
         valid_kwargs = {"molecules": 
-                                    "Comma-separated list of ids.\n"
+                                    "Comma-separated list of ids (not molecule names!).\n"
                                     "Cannot be used with other parameters",
 
                         "names": "Comma-separated list of names/synonyms.",
