@@ -7,4 +7,4 @@ setup(
     author = 'Workflow Informatics Corp.',
     author_email = 'chris.lowden@workflowinformatics.com',
     packages = ['CDD_Python_API'],
-    install_requires = ['numpy','pandas'])
+    install_requires = ['numpy','pandas','requests'])
