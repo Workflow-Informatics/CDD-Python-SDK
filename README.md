@@ -18,3 +18,7 @@ __POST Methods to Implement:__
 __PUT Methods to Implement: done.__
 
 __DELETE Methods to Implement: done.__
+
+__QOL Changes__:
+
+ - Set dataframe indexes based on responses 
