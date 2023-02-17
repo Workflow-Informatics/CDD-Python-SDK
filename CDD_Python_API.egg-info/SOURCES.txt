@@ -1,8 +1,0 @@
-README.md
-setup.py
-CDD_Python_API/CDD_API_Client.py
-CDD_Python_API.egg-info/PKG-INFO
-CDD_Python_API.egg-info/SOURCES.txt
-CDD_Python_API.egg-info/dependency_links.txt
-CDD_Python_API.egg-info/requires.txt
-CDD_Python_API.egg-info/top_level.txt
