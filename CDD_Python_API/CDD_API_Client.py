@@ -31,7 +31,7 @@ import time
 import datetime as dt
 
 
-class vaultClient(object):
+class VaultClient(object):
 
     def __init__(self, vaultNum, apiKey):
 
