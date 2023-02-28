@@ -38,9 +38,13 @@ class VaultClient(object):
         self.setVaultNumAndURL(vaultNum)
         self.setAPIKey(apiKey)
 
+        self.setMaxSyncObjects()
+
+
     def __str__(self):
 
         return f'Client for Vault ID: {self.vaultNum} instantiated {str(dt.datetime.now())}'
+
 
     def setVaultNumAndURL(self, vaultNum):
 
@@ -72,6 +76,25 @@ class VaultClient(object):
         return self.apiKey
 
 
+    def setMaxSyncObjects(self, value=1000):
+        """
+        :Description: sets the 'maxSyncObjects' attribute, which is used to determine
+                      when a synchronous vs asynchronous export request is submitted
+                      to CDD. If the # of objects returned from a GET request is ever
+                      >= maxSyncObjects, the call will be repeated asynchronously.
+
+                      Defaults to 1000, the maximum # of objects which a CDD GET request
+                      can return synhcronously.
+
+                      Only used in methods where GET requests can be performed asynchronously:
+                      Molecules, Batches, Plates, Protocols, and Protocol Data. See method
+                      sendSyncAndAsyncGets().
+        """
+
+        self.maxSyncObjects = value
+
+        return self.maxSyncObjects
+
     
     """
     GET Methods to Implement:
@@ -80,7 +103,7 @@ class VaultClient(object):
     Files - in progress.
     Molecule - finish adding help documentation for query parameters.
     Plot -
-    Protocol Data - almost done except need to implement 'format' optional parameter.
+    Protocol Data - almost done except need to implement logic for 'format' optional parameter.
     Saved Search -
 
     POST Methods to Implement:
@@ -115,11 +138,9 @@ class VaultClient(object):
         :Description: Constructs the query string, which will be appended
                       to the URL endpoint when making GET requets.
 
-                      Note that, when available, function calls are *always*
-                      made asynchronously.
         """
 
-        if len(kwargs) == 0 and "async" not in valid_kwargs: # No additional query parameters.
+        if len(kwargs) == 0: # No additional query parameters.
             
             return "" 
 
@@ -127,7 +148,6 @@ class VaultClient(object):
         # Remove any invalid dictionary keys/parameters from kwargs + warn user, before constructing 
         # the query string:
 
-        kwargs["async"] = "true"
         for k in list(kwargs):
 
             if k not in valid_kwargs: 
@@ -153,8 +173,40 @@ class VaultClient(object):
 
         # Check for errors:
         assert (response.status_code == 200), response.json()
-        
+
         return response.json()
+
+
+    def sendSyncAndAsyncGets(self, suffix, kwargs, valid_kwargs):
+        """
+        :Description: for methods where GET requests can be performed
+                      both synchronously and asynchronously, data will
+                      first be retrieved using a syncronous GET request.
+
+                      If the # of objects returned is >= 'maxSyncObjects'
+                      attribute, the request will be repeated asynchronously
+                      to avoid any loss of data.
+        """
+
+        kwargs["page_size"] = self.maxSyncObjects
+        queryString = self.buildQueryString(kwargs, valid_kwargs)
+
+        URL = self.URL + suffix + queryString
+
+        objects = self.sendGetRequest(URL)
+
+        if "count" in objects and objects["count"] >= (self.maxSyncObjects - 1):
+
+            kwargs["async"] = "true"
+            queryString = self.buildQueryString(kwargs, valid_kwargs)
+            URL = self.URL + suffix + queryString
+
+            exportID =self.sendGetRequest(URL)["id"]
+            objects = self.getAsyncExport(exportID)
+
+        else: objects = objects["objects"]
+
+        return objects
 
 
     def getAsyncExport(self, exportID, interval=5.0):
@@ -227,8 +279,7 @@ class VaultClient(object):
                         "molecule_created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
                         "molecule_created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
 
-                        #"offset",
-                        #"page_size",
+                        "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
                                     "Defaults to all available projects.\n"
@@ -249,16 +300,12 @@ class VaultClient(object):
 
         if help: return self.formatHelp(valid_kwargs)
 
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
-            
-        suffix = "/batches"
-        URL = self.URL + suffix + queryString
-        
-
         # Get batches + format output:
 
-        exportID = self.sendGetRequest(URL)["id"]
-        batches = self.getAsyncExport(exportID)
+        suffix = "/batches"
+
+        batches = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
         if asDataFrame: batches = pd.DataFrame.from_dict(batches)
 
         return batches
@@ -381,8 +428,8 @@ class VaultClient(object):
                         "batch_field_after_name": "",
                         "batch_field_after_date": "",
 
-                        #"offset",
-                        #"page_size",
+
+                        "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
                                     "Defaults to all available projects.\n"
@@ -412,16 +459,12 @@ class VaultClient(object):
 
         if help: return self.formatHelp(valid_kwargs)
 
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
-            
-        suffix = "/molecules"
-        URL = self.URL + suffix + queryString
-        
-
         # Get molecules + format output:
 
-        exportID = self.sendGetRequest(URL)["id"]
-        molecules = self.getAsyncExport(exportID)
+        suffix = "/molecules"
+
+        molecules = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
         if asDataFrame: molecules = pd.DataFrame.from_dict(molecules)
 
         return molecules
@@ -445,8 +488,7 @@ class VaultClient(object):
                         "async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
                                  "Use for large data sets. Note - always set to True when using Python API",
 
-                        #"offset",
-                        #"page_size",
+                        "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
                                     "Defaults to all available projects.\n"
@@ -455,16 +497,12 @@ class VaultClient(object):
 
         if help: return self.formatHelp(valid_kwargs)
 
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
-            
-        suffix = "/plates"
-        URL = self.URL + suffix + queryString
-        
-
         # Get plates + format output:
 
-        exportID = self.sendGetRequest(URL)["id"]
-        plates = self.getAsyncExport(exportID)
+        suffix = "/plates"
+
+        plates = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
         if asDataFrame: plates = pd.DataFrame.from_dict(plates)
 
         return plates
@@ -503,8 +541,7 @@ class VaultClient(object):
 
                         "molecules": "Comma-separated list of molecule ids.",
 
-                        #"offset",
-                        #"page_size",
+                        "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
                                     "Defaults to all available projects.\n"
@@ -519,17 +556,13 @@ class VaultClient(object):
 
 
         if help: return self.formatHelp(valid_kwargs)
-
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
             
-        suffix = "/protocols"
-        URL = self.URL + suffix + queryString
-        
-
         # Get protocols + format output:
 
-        exportID = self.sendGetRequest(URL)["id"]
-        protocols = self.getAsyncExport(exportID)
+        suffix = "/protocols"
+
+        protocols = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
         if asDataFrame: protocols = pd.DataFrame.from_dict(protocols)
 
         return protocols
@@ -558,8 +591,7 @@ class VaultClient(object):
 
                         "runs": "Comma-separated list of run ids for the given protocol. Include only data for runs listed.",
 
-                        #"offset",
-                        #"page_size",
+                        "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
                                     "Defaults to all available projects.\n"
@@ -572,17 +604,12 @@ class VaultClient(object):
 
         if help: return self.formatHelp(valid_kwargs)
 
-        if "format" in kwargs: del valid_kwargs["async"] # Exclude async prm, if user specifies format.
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
-            
-        suffix = f"/protocols/{id}/data"
-        URL = self.URL + suffix + queryString
-        
-
         # Get protocol data + format output:
-        
-        exportID = self.sendGetRequest(URL)["id"]
-        data = self.getAsyncExport(exportID)
+
+        suffix = f"/protocols/{id}/data"        
+
+        data = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
         if asDataFrame: data = pd.DataFrame.from_dict(data)
 
         return data
