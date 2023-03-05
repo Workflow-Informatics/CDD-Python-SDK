@@ -55,6 +55,8 @@ class VaultClient(object):
 
         self.URL = URL
 
+        return (self.vaultNum, self.URL)
+
 
     def getVaultNum(self):
 
@@ -103,7 +105,6 @@ class VaultClient(object):
     Files - in progress.
     Molecule - finish adding help documentation for query parameters.
     Plot -
-    Protocol Data - almost done except need to implement logic for 'format' optional parameter.
     Saved Search -
 
     POST Methods to Implement:
@@ -166,10 +167,14 @@ class VaultClient(object):
         return queryString
 
 
-    def sendGetRequest(self, URL):
+    def sendGetRequest(self, URL, asText=False):
 
         headers = {"X-CDD-Token": self.apiKey}
         response = requests.get(URL, headers=headers)
+
+        if asText and response.status_code == 200:
+
+            return response.text
 
         # Check for errors:
         assert (response.status_code == 200), response.json()
@@ -209,7 +214,7 @@ class VaultClient(object):
         return objects
 
 
-    def getAsyncExport(self, exportID, interval=5.0):
+    def getAsyncExport(self, exportID, interval=5.0, asText=False, statusUpdates=True):
         """
         :Description: used to both check the status of an in-progress CDD asynchronous export,
                       as well as retrieve the data once the export has been completed.
@@ -218,6 +223,10 @@ class VaultClient(object):
                       
                       {'id': 19211628, 'created_at': '2022-11-03T02:02:12.000Z', 
                                         'modified_at': '2022-11-03T02:02:12.000Z', 'status': 'started'}
+
+        :asText: determines whether the data in response is returned as a json (default behavior) or a string.
+
+        :statusUpdates (bool): if true, displays status updates of asynchronous export to screen.
 
         :return: json output, with formatting dependent 
 
@@ -231,7 +240,8 @@ class VaultClient(object):
 
         while True:
 
-            response = self.sendGetRequest(URL); print(response)
+            response = self.sendGetRequest(URL)
+            if statusUpdates: print(response)
             status = response["status"]
 
             assert status in nonErrorStates, f"Export status '{status}' indicates the export has failed to complete."
@@ -245,6 +255,11 @@ class VaultClient(object):
         
         suffix = f"/exports/{exportID}"
         URL = self.URL + suffix
+
+        if asText:
+
+            response = self.sendGetRequest(URL, asText=asText)
+            return response
 
         response = self.sendGetRequest(URL)["objects"]
         return response
@@ -568,7 +583,7 @@ class VaultClient(object):
         return protocols
 
 
-    def getProtocolData(self, id=None, asDataFrame=True, help=False, **kwargs):
+    def getProtocolData(self, id=None, asDataFrame=True, help=False, statusUpdates=True, **kwargs):
         """
         :Description: returns (a subset of) the readout data for a single protocol using its protocol ID.
                       'id' argument is required, unless 'help' is set to True.
@@ -599,14 +614,29 @@ class VaultClient(object):
 
                         "format": "'csv' - generates a csv file which mimics the file generated when you choose the 'Export readouts' button\n" 
                                   "from the Run-level 'Run Details' tab within the CDD Vault web interface.\n"
-                                  "Not compatible with async. Under construction."}
+
+                                  "When used as a keyword argument, this forces an asynchronous GET request. All other keyword arguments will\n"
+                                  "be ignored, excluding the 'runs' keyword if included."}
 
 
         if help: return self.formatHelp(valid_kwargs)
 
         # Get protocol data + format output:
 
-        suffix = f"/protocols/{id}/data"        
+        suffix = f"/protocols/{id}/data" 
+
+        if "format" in kwargs: # Special behavior for when 'format' arg is included.
+
+            kwargs = {k:v for k,v in kwargs.items() if k in ["format", "runs"]}
+            queryString = self.buildQueryString(kwargs, valid_kwargs)
+
+            URL = self.URL + suffix + queryString
+
+            exportID = self.sendGetRequest(URL)["id"]
+            data = self.getAsyncExport(exportID, statusUpdates=statusUpdates, asText=True)
+
+            return data
+
 
         data = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
