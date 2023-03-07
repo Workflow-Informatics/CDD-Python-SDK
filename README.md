@@ -5,7 +5,6 @@
 __GET Methods to Implement:__
 
   - ELN Entries: TBD
-  - Files: in progress.
   - Molecules: finish adding help documentation for query parameters.
   - Plot: TBD
   - Saved Search: TBD
