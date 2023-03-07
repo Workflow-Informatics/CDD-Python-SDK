@@ -21,14 +21,14 @@ If you're stuck, check out the Quickstart Guide
 '''
 
 import base64
+import datetime as dt
 import json
 import numpy as np
 import os
-import requests
 import pandas as pd
-import sys # are we using this?
+import requests
+import sys
 import time
-import datetime as dt
 
 
 class VaultClient(object):
@@ -351,21 +351,31 @@ class VaultClient(object):
         return fields
 
 
-    def getFile(self, fileID, destination=None):
+    def getFile(self, fileID, destFolder=None):
+        """
+        :Description: retrieves a single file object from CDD Vault using its file ID.
+
+        :destFolder (str): destination folder where file contents should be written to.
+                           File name will default to the original name of the file when
+                           it was uploaded to CDD Vault.
+        """
 
         suffix = f"/files/{fileID}"
         URL = self.URL + suffix
 
-        file = self.sendGetRequest(URL)
+        response = self.sendGetRequest(URL)
 
-        file = file["contents"]
-        file = base64.b64decode(file)
+        contents = response["contents"]
+        contents = base64.b64decode(contents) # Decodes base64-encoded file contents.
 
-        #file = base64.b64decode(file)
-        #file = file.encode("utf-8")
-        print(file)
-        #print(file.keys())
-        return file
+        if destFolder:
+
+            fName = response["name"]
+            destPath = os.path.join(destFolder, fName)
+
+            with open(destPath, "wb") as f: f.write(contents)
+
+        return contents
 
 
     def getMappingTemplates(self, id=None, asDataFrame=True):

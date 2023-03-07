@@ -8,7 +8,6 @@ __GET Methods to Implement:__
   - Files: in progress.
   - Molecules: finish adding help documentation for query parameters.
   - Plot: TBD
-  - Protocol Data: almost done except need to implement 'format' optional parameter.
   - Saved Search: TBD
 
 __POST Methods to Implement:__
