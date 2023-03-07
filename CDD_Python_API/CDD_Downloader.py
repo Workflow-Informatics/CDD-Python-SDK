@@ -1,10 +1,12 @@
 
+import argparse
 import json
 import os
 import pandas as pd
 import shutil
 import sys
 
+from gooey import Gooey
 from CDD_API_Client import VaultClient
 
 
@@ -225,16 +227,10 @@ class CDD_Downloader(VaultClient):
                 ID = localRunIDs[i]
                 if ID not in runs["Run ID"].values: pathsToDelete.append(localRunDirs[i])
 
-            endLine = "\n"
-            deletePaths = input("\nDelete the following local paths (y/n):"
-                                f"\n\n{endLine.join(pathsToDelete)}\n\n")
+            for p in pathsToDelete:
 
-            if deletePaths[0].lower() == "y": 
-                
-                for p in pathsToDelete:
-
-                    print(f"Deleting run folder '{p}'")
-                    shutil.rmtree(p)
+                print(f"\nDeleting run folder '{p}'\n")
+                shutil.rmtree(p)
 
             return runs
 
@@ -245,3 +241,86 @@ class CDD_Downloader(VaultClient):
         runs = extractCDDRuns(runs)
         runs = removeExtraRunDirs(runs)
 
+
+@Gooey(program_name="CDD Downloader", 
+       image_dir=os.path.join(os.path.dirname(__file__), "..", "image_dir"))
+def main():
+    """
+    :Description: performs CDD run data extraction as a GUI application
+                  using argparse + Gooey libraries.
+
+    """
+
+    # Set application arguments using those provided at the command line
+    # and from any previous CDD_Downloader sessions:
+
+    sessFile = os.path.join(os.path.dirname(__file__), "session.json")
+
+    prevSessArgs = json.load(fp=open(sessFile)) # Prev session args.
+
+
+    # Specify command-line arguments:
+
+    parser = argparse.ArgumentParser(description="CDD Downloader")
+
+    parser.add_argument("--top_dir", default=prevSessArgs.get("top_dir"))
+    parser.add_argument("--vault_num", default=prevSessArgs.get("vault_num"))
+    parser.add_argument("--vault_key", default=prevSessArgs.get("vault_key"))
+
+    parser.add_argument("--project_ids", default=prevSessArgs.get("project_ids"))
+    parser.add_argument("--project_names", default=prevSessArgs.get("project_names"))
+    
+    parser.add_argument("--protocol_ids", default=prevSessArgs.get("protocol_ids"))
+    parser.add_argument("--protocol_names", default=prevSessArgs.get("protocol_names"))
+
+    parser.add_argument("--runs_before", default=prevSessArgs.get("runs_before"))
+    parser.add_argument("--runs_after", default=prevSessArgs.get("runs_after"))
+
+    currSessArgs = vars(parser.parse_args()) # Command line args.
+
+
+    # Initialize CDD Downloader instance:
+
+    topDir = currSessArgs.get("top_dir")
+    vaultNum = currSessArgs.get("vault_num")
+    apiKey = currSessArgs.get("vault_key")
+
+    initArgs = [vaultNum, apiKey, topDir]
+    cddDownloader = CDD_Downloader(*initArgs)
+
+
+    # Set any optional parameters for CDD Downloader:
+
+    if currSessArgs["project_names"]:
+
+        projects = currSessArgs.get("project_names").split(";")
+        cddDownloader.setProjects(names=projects)
+
+    elif currSessArgs["project_ids"]:
+
+        projects = currSessArgs.get("project_ids").split(";")
+        cddDownloader.setProjects(ids=projects)
+
+    if currSessArgs["protocol_names"]:
+
+        protocols = currSessArgs.get("protocol_names").split(";")
+        cddDownloader.setProtocols(names=protocols)
+
+    elif currSessArgs["protocol_ids"]:
+
+        protocols = currSessArgs.get("protocols_ids").split(";")
+        cddDownloader.setProtocols(ids=protocols)
+
+    cddDownloader.setRunDates(runs_before=currSessArgs["runs_before"],
+                              runs_after=currSessArgs["runs_after"])
+
+
+    # # Extract CDD runs + save current session arguments:
+
+    cddDownloader.downloadCDDRuns()
+    json.dump(currSessArgs, indent=4, fp=open(sessFile, "w"))
+    
+
+if __name__ == "__main__":
+
+    main()
