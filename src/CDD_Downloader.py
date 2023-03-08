@@ -178,6 +178,27 @@ class CDD_Downloader(VaultClient):
             return runs
 
 
+        def extractCDDRunFiles(runMeta, runFolder):
+
+            # Retrieves both the attached + source files from CDD Vault for the specified
+            # run and writes to the matching run subfolder.
+
+            fileTypes = ["source_files", "attached_files"]
+
+            for t in fileTypes:
+
+                files = runMeta[t]
+
+                destFolder = os.path.join(runFolder, t)
+                if os.path.exists(destFolder): shutil.rmtree(destFolder)
+                os.makedirs(destFolder)
+
+                for f in files: 
+
+                    self.getFile(fileID=f["id"], destFolder=destFolder)
+                    print(f"Extracted file '{f['name']}' to folder:\n{destFolder}\n")
+
+                
         def extractCDDRuns(runs):
 
             # Extract specified runs from CDD Vault to a subfolder under 'topDir' attribute.
@@ -190,11 +211,11 @@ class CDD_Downloader(VaultClient):
                 protoID = r["Protocol ID"]
                 cddRunModDate = r["Run Modified Date"] # Up-to-date run modified date from CDD.
 
-                targetFolder = r["Target Folder"]
-                if not os.path.exists(targetFolder): os.makedirs(targetFolder)
+                destFolder = r["Target Folder"]
+                if not os.path.exists(destFolder): os.makedirs(destFolder)
 
-                dataFile = os.path.join(targetFolder, f"run-data-{runID}.csv")
-                metaFile = os.path.join(targetFolder, f"run-meta-{runID}.json")
+                dataFile = os.path.join(destFolder, f"run-data-{runID}.csv")
+                metaFile = os.path.join(destFolder, f"run-meta-{runID}.json")
 
                 # Skip run download if modified date has not changed since prev extraction:
 
@@ -203,12 +224,14 @@ class CDD_Downloader(VaultClient):
                     localRunModDate = json.load(fp=open(metaFile))["modified_at"]
                     if localRunModDate == cddRunModDate: continue
 
-                data = self.getProtocolData(id=protoID, format="csv", runs=runID, statusUpdates=False)
-                meta = self.getRun(runID=runID)
+                runData = self.getProtocolData(id=protoID, format="csv", runs=runID, statusUpdates=False)
+                runMeta = self.getRun(runID=runID)
 
-                print(data, file=open(dataFile, "w"))
-                json.dump(meta, indent=4, fp=open(metaFile, "w"))
+                print(runData, file=open(dataFile, "w"))
+                json.dump(runMeta, indent=4, fp=open(metaFile, "w"))
                 print(f"Extracted run '{runID}' to path:\n{dataFile}\n")
+
+                extractCDDRunFiles(runMeta=runMeta, runFolder=destFolder)
 
             return runs
 
@@ -219,7 +242,8 @@ class CDD_Downloader(VaultClient):
 
             pathsToDelete = []
 
-            localRunDirs = [p[0] for p in os.walk(self.topDir) if len(p[1]) == 0]
+            localRunDirs = [p[0] for p in os.walk(self.topDir)]
+            localRunDirs = [os.path.dirname(p) for p in localRunDirs if "source_files" in p]
             localRunIDs = [p.split("_")[-1] for p in localRunDirs]
 
             for i in range(len(localRunIDs)):

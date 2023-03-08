@@ -533,6 +533,21 @@ class VaultClient(object):
         return plates
 
 
+    def getPlot(self, batchID, protocolID, size="small", destFolder=None):
+        """
+        :Description:
+        """
+
+        assert size in ["small", "medium", "large"], "Not a valid value."
+
+        suffix = f"/batches/{batchID}/protocols/{protocolID}/plot"
+
+        URL = self.URL + suffix + f"?{size}"; print(URL)
+
+        response = self.sendGetRequest(URL=URL)
+        print(response)
+
+
     def getProtocols(self, asDataFrame=True, help=False, **kwargs):
         """
         :Description: returns a list of protocols based on criteria as specified by parameters:
