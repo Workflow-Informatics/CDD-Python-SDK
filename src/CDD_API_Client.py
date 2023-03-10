@@ -102,7 +102,6 @@ class VaultClient(object):
     GET Methods to Implement:
 
     ELN Entries -
-    Files - in progress.
     Molecule - finish adding help documentation for query parameters.
     Plot -
     Saved Search -
@@ -209,6 +208,10 @@ class VaultClient(object):
             exportID =self.sendGetRequest(URL)["id"]
             objects = self.getAsyncExport(exportID)
 
+            if objects["status"] == "canceled": 
+                
+                sys.exit(1)
+
         else: objects = objects["objects"]
 
         return objects
@@ -228,27 +231,33 @@ class VaultClient(object):
 
         :statusUpdates (bool): if true, displays status updates of asynchronous export to screen.
 
-        :return: json output, with formatting dependent 
+        :return: json output.
 
         :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-
         """
 
-        suffix = f"/export_progress/{exportID}"
-        URL = self.URL + suffix
+        try:
+            suffix = f"/export_progress/{exportID}"
+            URL = self.URL + suffix
 
-        nonErrorStates = ["new", "started", "finished"] # Any export status except these 3 should return an error.
+            nonErrorStates = ["new", "started", "finished"] 
+            # ^Any export status except these 3 should return an error.
 
-        while True:
+            while True:
 
-            response = self.sendGetRequest(URL)
-            if statusUpdates: print(response)
-            status = response["status"]
+                response = self.sendGetRequest(URL)
+                if statusUpdates: print(response)
+                status = response["status"]
 
-            assert status in nonErrorStates, f"Export status '{status}' indicates the export has failed to complete."
+                assert status in nonErrorStates, f"Export status '{status}' indicates the export has failed to complete."
 
-            if status == "finished": break
+                if status == "finished": break
 
-            time.sleep(interval) # CDD-recommended time-interval for export checks is 5-10 sec.
+                time.sleep(interval) # CDD-recommended time-interval for export checks is 5-10 sec.
+
+        except KeyboardInterrupt as e: # Cancels in-progress asynchronous export.
+
+            return self.deleteExport(exportID)
 
         
         # Get export data:
@@ -1186,6 +1195,29 @@ class VaultClient(object):
         # projects array for the specified batch id.
 
         return self.putBatches(id, data={"projects": []})
+
+
+    def deleteExport(self, id):
+        """
+        :Description: deletes an in-progress asynchronous export.
+
+                      Primarily used during keyboard interrupts in the
+                      getAsyncExport() method.
+
+        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-DELETE-
+        """
+
+        # Construct URL:
+
+        suffix = f"/exports/{id}"
+        URL = self.URL + suffix
+        
+        # Delete running asynchronous export in CDD Vault + retrieve response:
+        
+        response = self.sendDeleteRequest(URL)
+        print(response)
+        
+        return response
 
 
     def deleteMolecules(self, id):
