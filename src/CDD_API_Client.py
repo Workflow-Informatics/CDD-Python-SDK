@@ -257,7 +257,10 @@ class VaultClient(object):
 
         except KeyboardInterrupt as e: # Cancels in-progress asynchronous export.
 
-            return self.deleteExport(exportID)
+            delResponse = self.deleteExport(exportID)
+            if statusUpdates: print(delResponse)
+
+            return delResponse
 
         
         # Get export data:
@@ -1215,7 +1218,6 @@ class VaultClient(object):
         # Delete running asynchronous export in CDD Vault + retrieve response:
         
         response = self.sendDeleteRequest(URL)
-        print(response)
         
         return response
 
