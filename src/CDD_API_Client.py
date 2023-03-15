@@ -338,6 +338,24 @@ class VaultClient(object):
         return batches
 
 
+    def getDatasets(self, asDataFrame=True):
+        """
+        :Description: returns a list of accessible public data sets for the given vault.
+
+        :return: either a json list or a Pandas DataFrame.
+
+        :reference: https://support.collaborativedrug.com/hc/en-us/articles/115005693443-Data-Sets-GET-
+        """
+
+        suffix = "/data_sets"
+        URL = self.URL + suffix
+
+        datasets = self.sendGetRequest(URL=URL)
+        if asDataFrame: datasets = pd.DataFrame(datasets)
+            
+        return datasets
+
+
     def getFields(self, asDataFrame=True):
         """
         :Description: returns a list of available fields for the given vault.
