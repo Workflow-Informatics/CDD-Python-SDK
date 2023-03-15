@@ -208,7 +208,7 @@ class VaultClient(object):
             exportID =self.sendGetRequest(URL)["id"]
             objects = self.getAsyncExport(exportID)
 
-            if objects["status"] == "canceled": 
+            if type(objects) == dict and objects["status"] == "canceled": 
                 
                 sys.exit(1)
 
@@ -312,7 +312,9 @@ class VaultClient(object):
                                     "Defaults to all available projects.\n"
                                     "Limits scope of query.",
                         
-                        #"data_sets",
+                        "data_sets": "Comma-separated list of public data set ids.\n"
+                                     "Defaults to no data sets. Limits scope of query.",
+
                         "molecule_batch_identifier": "A Molecule-Batch ID used to query the Vault.\n" 
                                                      "Use this parameter to limit the number of Molecule UDF Fields to return",
 
@@ -490,7 +492,9 @@ class VaultClient(object):
                                     "Defaults to all available projects.\n"
                                     "Limits scope of query.",
 
-                        #"data_sets",
+                        "data_sets": "Comma-separated list of public data set ids.\n"
+                                     "Defaults to no data sets. Limits scope of query.",
+
                         "structure": "SMILES, cxsmiles or mol string for the query structure.\n"
                                      "Returns Molecules from the Vault that match the structure-based\n" 
                                      "query submitted via this API call.",
@@ -617,7 +621,8 @@ class VaultClient(object):
                                     "Defaults to all available projects.\n"
                                     "Limits scope of query.",
 
-                        #"data_sets",
+                        "data_sets": "Comma-separated list of public data set ids.\n"
+                                     "Defaults to no data sets. Limits scope of query.",
                          
                         "slurp": "Specify the slurp_id of an import operation.\n"
                                  "Once an import has been committed, you can return\n" 
