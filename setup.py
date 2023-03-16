@@ -1,10 +1,16 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
-    name = 'CDD_Python_API',
-    version  = '0.1.5',
-    description= 'A python wrapper for all CDD Vault API function calls',
+    name = 'cdd-api',
+    version  = '0.1.0',
+    description= 'A python wrapper for all CDD Vault API function calls.',
     author = 'Workflow Informatics Corp.',
     author_email = 'chris.lowden@workflowinformatics.com',
-    packages = ['CDD_Python_API'],
-    install_requires = ['numpy','pandas','requests'])
+    packages = find_packages(include=["cdd"]),
+    install_requires = [
+                        'numpy',
+                        'gooey',
+                        'pandas',
+                        'requests'
+                        ]
+    )
