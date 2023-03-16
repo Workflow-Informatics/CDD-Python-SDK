@@ -29,6 +29,7 @@ import pandas as pd
 import requests
 import sys
 import time
+import zipfile
 
 
 class VaultClient(object):
@@ -101,7 +102,6 @@ class VaultClient(object):
     """
     GET Methods to Implement:
 
-    ELN Entries -
     Molecule - finish adding help documentation for query parameters.
     Plot -
     Saved Search -
@@ -113,6 +113,8 @@ class VaultClient(object):
     PUT Methods to Implement: done.
 
     DELETE Methods to Implement: done.
+
+    Timeouts for sync/async calls?
     
     """
 
@@ -166,7 +168,7 @@ class VaultClient(object):
         return queryString
 
 
-    def sendGetRequest(self, URL, asText=False):
+    def sendGetRequest(self, URL, asText=False, asBytes=False):
 
         headers = {"X-CDD-Token": self.apiKey}
         response = requests.get(URL, headers=headers)
@@ -174,6 +176,10 @@ class VaultClient(object):
         if asText and response.status_code == 200:
 
             return response.text
+
+        elif asBytes and response.status_code == 200:
+
+            return response.content
 
         # Check for errors:
         assert (response.status_code == 200), response.json()
@@ -217,7 +223,7 @@ class VaultClient(object):
         return objects
 
 
-    def getAsyncExport(self, exportID, interval=5.0, asText=False, statusUpdates=True):
+    def getAsyncExport(self, exportID, interval=5.0, asText=False, asBytes=False, statusUpdates=True):
         """
         :Description: used to both check the status of an in-progress CDD asynchronous export,
                       as well as retrieve the data once the export has been completed.
@@ -228,6 +234,8 @@ class VaultClient(object):
                                         'modified_at': '2022-11-03T02:02:12.000Z', 'status': 'started'}
 
         :asText: determines whether the data in response is returned as a json (default behavior) or a string.
+
+        :asBytes: determines whether the data in response is returned as bytes.
 
         :statusUpdates (bool): if true, displays status updates of asynchronous export to screen.
 
@@ -271,6 +279,11 @@ class VaultClient(object):
         if asText:
 
             response = self.sendGetRequest(URL, asText=asText)
+            return response
+
+        elif asBytes:
+
+            response = self.sendGetRequest(URL, asBytes=asBytes)
             return response
 
         response = self.sendGetRequest(URL)["objects"]
@@ -356,6 +369,81 @@ class VaultClient(object):
         if asDataFrame: datasets = pd.DataFrame(datasets)
             
         return datasets
+
+
+    def getELNEntries(self, summary=True, asDataFrame=True, 
+                      exportPath=None, unzipELNEntries=False, help=False, **kwargs):
+        """
+        :Description: returns information on the ELN entries for the specified vault.
+
+        :summary (bool): if true, returns summary data for the requested ELN entries.
+
+        :asDataFrame (bool): returns the summary as a Pandas DataFrame. Only relevant if summary=True.
+
+        :exportPath (str): file path for extracting zipped ELN entries to. Only relevant if summary=False.
+
+        :unzipELNEntries (bool): if true, extracts the zip contents of exportPath to a directory.
+
+        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
+        """
+
+        valid_kwargs = {"eln_entries": "Comma-separated list of ELN entry IDs",
+
+                        "author": "Comma separated list of ELN author ID's.\n"
+                                  "Note: Must be users' ID's, users' names cannot be used",
+
+                        "status": "Returns ELN entries that have the status specified.\n" 
+                                  "Valid status values are: 'open', 'submitted', or 'finalized'.",
+
+                        "only_ids": "Boolean. If true, only the ELN entry ID's are returned,\n" 
+                                    "allowing for a smaller and faster response. Default: false",
+
+                        "created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "submitted_date_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "submitted_date_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "finalized_date_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "finalized_date_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+
+
+                        "projects": "Comma-separated list of project ids.\n"
+                                    "Defaults to all available projects.\n"
+                                    "Limits scope of query."}
+
+        if help: return self.formatHelp(valid_kwargs)
+
+        # Retrieve summary ELN data:
+
+        if summary:
+
+            suffix = "/eln/entries" + self.buildQueryString(kwargs, valid_kwargs)
+            URL = self.URL + suffix
+
+            elnEntries = self.sendGetRequest(URL)["objects"]
+            if asDataFrame: elnEntries = pd.DataFrame(elnEntries)
+
+            return elnEntries
+
+
+        # Retrieve zipped copy of ELN entries + optional extraction:
+
+        suffix = "/eln/entries?async=true" + self.buildQueryString(kwargs, valid_kwargs)
+        URL = self.URL + suffix
+
+        exportID = self.sendGetRequest(URL=URL)["id"]
+        elnEntries = self.getAsyncExport(exportID=exportID, asBytes=True)
+
+        if not exportPath.endswith(".zip"): exportPath += ".zip"
+        with open(exportPath, "wb") as f: f.write(elnEntries)
+
+        if unzipELNEntries:
+
+            directory = os.path.splitext(exportPath)[0]
+            with zipfile.ZipFile(exportPath, "r") as z:
+
+                z.extractall(directory)
 
 
     def getFields(self, asDataFrame=True):
