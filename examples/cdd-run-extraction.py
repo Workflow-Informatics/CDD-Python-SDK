@@ -2,10 +2,7 @@
 import os
 import sys
 
-cddLibPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "src")
-sys.path.append(cddLibPath)
-
-from CDD_Downloader import CDD_Downloader
+from cdd.CDD_Downloader import CDD_Downloader
 
 if __name__ == "__main__":
 
