@@ -7,7 +7,7 @@ import shutil
 import sys
 
 from gooey import Gooey
-from CDD_API_Client import VaultClient
+from VaultClient import VaultClient
 
 
 class CDD_Downloader(VaultClient):
