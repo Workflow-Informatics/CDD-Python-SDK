@@ -12,6 +12,18 @@ cd CDD-Python-API/
 python setup.py install
 ```
 
+### Getting Started
+
+Instantiate a client for working with your vault data:
+```
+from cdd.VaultClient import VaultClient
+
+vaultNum = 4598
+apiToken = os.environ["cddAPIToken"]
+
+vault = VaultClient(vaultNum, apiToken)
+```
+
 __GET Methods to Implement:__
 
   - Molecules: finish adding help documentation for query parameters.
