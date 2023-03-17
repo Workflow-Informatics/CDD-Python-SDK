@@ -98,23 +98,6 @@ class VaultClient(object):
 
         return self.maxSyncObjects
 
-    
-    """
-    GET Methods to Implement:
-
-    Molecule - finish adding help documentation for query parameters.
-    Plot -
-    Saved Search -
-
-    POST Methods to Implement: done.
-
-    PUT Methods to Implement: done.
-
-    DELETE Methods to Implement: done.
-
-    Timeouts for sync/async calls?
-    
-    """
 
     def formatHelp(self, valid_kwargs):
         """
