@@ -106,9 +106,7 @@ class VaultClient(object):
     Plot -
     Saved Search -
 
-    POST Methods to Implement:
-
-    ELN Entries -
+    POST Methods to Implement: done.
 
     PUT Methods to Implement: done.
 
@@ -894,6 +892,34 @@ class VaultClient(object):
         
 
         # Post batch to CDD Vault + get response:
+
+        response = self.sendPostRequest(URL, data)
+
+        return response
+
+
+    def postELNEntries(self, project, title=None, eln_fields={}):
+        """
+        :Description: creates a new ELN entry.
+
+        :project (str): the project ID or name where the new ELN entry will be created.
+
+        :title (str): the title of the new ELN entry.
+
+        :eln_fields (dict): a set of configured ELN field/value pairs which have been set by
+                            a Vault Administrator for the specified vault.
+
+        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
+        """
+
+        suffix = "/eln/entries"
+        URL = self.URL + suffix
+
+        data = {
+                "title": title,
+                "project": project,
+                "eln_fields": eln_fields
+        }
 
         response = self.sendPostRequest(URL, data)
 

@@ -18,9 +18,7 @@ __GET Methods to Implement:__
   - Plot: TBD
   - Saved Search: TBD
 
-__POST Methods to Implement:__
-
-  - ELN Entries: TBD
+__POST Methods to Implement: done.__
 
 __PUT Methods to Implement: done.__
 
