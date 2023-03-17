@@ -48,8 +48,17 @@ class VaultClient(object):
 
 
     def setVaultNumAndURL(self, vaultNum):
+        """
+        :Description: sets the vault ID and constructs the base URL, from which endpoints
+                      for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
 
-        self.vaultNum = vaultNum
+        :vaultNum (int or str): unique integer ID of the target vault.
+
+        :return (tuple): a two-element tuple consisting of the vault ID and the base URL for
+                         accessing the CDD Vault API.
+        """
+
+        self.vaultNum = int(vaultNum)
 
         URL = "https://app.collaborativedrug.com/api/v1/vaults/"
         URL = URL + str(vaultNum)
@@ -60,21 +69,49 @@ class VaultClient(object):
 
 
     def getVaultNum(self):
+        """
+        :Description: returns the unique integer ID of the target vault.
+
+        :return (int): 
+        """
 
         return self.vaultNum
     
 
     def getURL(self):
+        """
+        :Description: returns the base URL used in the construction of
+                      CDD Vault API calls (GET, POST, PUT, DELETE).
+
+        :return (str):
+        """
 
         return self.URL
 
 
     def setAPIKey(self, apiKey):
+        """
+        :Description: sets the API token credentials, which will be passed
+                      in the request header to CDD Vault with each API request. 
+
+                      Note that the API token must have read/write access to
+                      the vault specified by the vault ID when executing the
+                      various API calls or an error will be returned.
+
+        :return (str):
+        """
 
         self.apiKey = apiKey
 
+        return self.apiKey
+
 
     def getAPIKey(self):
+        """
+        :Description: returns the currently set API key.
+
+        :return (str):
+        """
 
         return self.apiKey
 
@@ -119,8 +156,9 @@ class VaultClient(object):
     def buildQueryString(self, kwargs, valid_kwargs):
         """
         :Description: Constructs the query string, which will be appended
-                      to the URL endpoint when making GET requets.
+                      to the URL endpoint when making GET requests.
 
+        :return (str):
         """
 
         if len(kwargs) == 0: # No additional query parameters.
