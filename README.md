@@ -6,7 +6,7 @@
 
 To install, run:
 
-```
+```bash
 git clone https://github.com/Workflow-Informatics/CDD-Python-API.git
 cd CDD-Python-API/
 python setup.py install
@@ -15,7 +15,7 @@ python setup.py install
 ### Getting Started
 
 Instantiate a client for working with your vault data:
-```
+```python
 from cdd.VaultClient import VaultClient
 
 vaultNum = 4598 # Insert your unique vault ID here.
