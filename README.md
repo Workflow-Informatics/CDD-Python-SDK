@@ -1,6 +1,6 @@
 # CDD-Python-API
 
-## A Python client for rapid execution of CDD Vault API methods which can be found [here](https://support.collaborativedrug.com/hc/en-us/sections/115001607043-API-Function-Calls)
+## A Python client for rapid execution of [CDD Vault API methods](https://support.collaborativedrug.com/hc/en-us/sections/115001607043-API-Function-Calls).
 
 ### Installation
 
