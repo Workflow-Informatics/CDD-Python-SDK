@@ -15,6 +15,7 @@ python setup.py install
 ### Getting Started
 
 Instantiate a client for working with your vault data:
+
 ```python
 from cdd.VaultClient import VaultClient
 
@@ -22,6 +23,14 @@ vaultNum = 4598 # Insert your unique vault ID here.
 apiToken = os.environ["cddAPIToken"] # Insert your API token here.
 
 vault = VaultClient(vaultNum, apiToken)
+```
+
+Get a list of projects + protocols as separate Pandas DataFrames:
+
+```python
+
+projects = vault.getProjects()
+protocols = vault.getProtocols()
 ```
 
 __GET Methods to Implement:__
