@@ -18,8 +18,8 @@ Instantiate a client for working with your vault data:
 ```
 from cdd.VaultClient import VaultClient
 
-vaultNum = 4598
-apiToken = os.environ["cddAPIToken"]
+vaultNum = 4598 # Insert your unique vault ID here.
+apiToken = os.environ["cddAPIToken"] # Insert your API token here.
 
 vault = VaultClient(vaultNum, apiToken)
 ```
