@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     vaultNum = 4598
     topDir = os.getcwd()
-    apiKey = os.environ["cddAPIToken"]
+    apiKey = os.environ["cddAPIToken"] # Insert your API token string here.
 
     args = [vaultNum, apiKey, topDir]
 

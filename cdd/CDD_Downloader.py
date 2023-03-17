@@ -267,7 +267,7 @@ class CDD_Downloader(VaultClient):
 
 
 @Gooey(program_name="CDD Downloader", 
-       image_dir=os.path.join(os.path.dirname(__file__), "..", "image_dir"))
+       image_dir=os.path.join(os.path.dirname(__file__), "image_dir"))
 def main():
     """
     :Description: performs CDD run data extraction as a GUI application
