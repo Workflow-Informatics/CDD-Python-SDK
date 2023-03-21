@@ -124,7 +124,7 @@ class VaultClient(object):
                       >= maxSyncObjects, the call will be repeated asynchronously.
 
                       Defaults to 1000, the maximum # of objects which a CDD GET request
-                      can return synhcronously.
+                      can return synchronously.
 
                       Only used in methods where GET requests can be performed asynchronously:
                       Molecules, Batches, Plates, Protocols, and Protocol Data. See method
@@ -585,12 +585,12 @@ class VaultClient(object):
                         "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
                         "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
 
-                        "batch_created_before": "",
-                        "batch_created_after": "",
-                        "batch_field_before_name": "",
-                        "batch_field_before_date": "",
-                        "batch_field_after_name": "",
-                        "batch_field_after_date": "",
+                        "batch_created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "batch_created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "batch_field_before_name": "Batch field name",
+                        "batch_field_before_date": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+                        "batch_field_after_name": "Batch field name",
+                        "batch_field_after_date": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
 
 
                         "page_size": "The maximum # of objects to return.",
