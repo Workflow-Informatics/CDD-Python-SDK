@@ -321,10 +321,7 @@ class VaultClient(object):
         valid_kwargs = {"batches": 
                                     "Comma-separated list of ids.\n"
                                     "Cannot be used with other parameters",
-
-                        "async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
-                                 "Use for large data sets. Note - always set to True when using Python API",
-
+                        
                         "no_structures": "Boolean. If true, omit structure representations\n" 
                                          "for a smaller and faster response. Default: false",
 
@@ -571,9 +568,6 @@ class VaultClient(object):
 
                         "names": "Comma-separated list of names/synonyms.",
 
-                        "async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
-                                 "Use for large data sets. Note - always set to True when using Python API",
-
                         "no_structures": "Boolean. If true, omit structure representations\n" 
                                          "for a smaller and faster response. Default: false",
 
@@ -651,9 +645,6 @@ class VaultClient(object):
 
                         "locations": "Comma-delimited list of plate locations.",
 
-                        "async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
-                                 "Use for large data sets. Note - always set to True when using Python API",
-
                         "page_size": "The maximum # of objects to return.",
 
                         "projects": "Comma-separated list of project ids.\n"
@@ -704,9 +695,6 @@ class VaultClient(object):
 
                         "names": "Comma-separated list of protocol names.\n"
                                   "Cannot be used with other parameters.",
-
-                        "async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
-                                 "Use for large data sets. Note - always set to True when using Python API",
 
                         "only_ids": "Boolean. If true, only the Protocol IDs are returned,\n" 
                                     "allowing for a smaller and faster response. Default: false",
@@ -760,10 +748,7 @@ class VaultClient(object):
 
         # Construct URL:
 
-        valid_kwargs = {"async": "Boolean. If true, do an asynchronous export (see Async Export).\n"
-                                 "Use for large data sets. Note - always set to True when using Python API",
-
-                        "plates": "Comma-separated list of plate ids. Include only data for the specified plates.",
+        valid_kwargs = {"plates": "Comma-separated list of plate ids. Include only data for the specified plates.",
 
                         "molecules": "Comma-separated list of molecule ids. Include only data for the specified molecules.",
 
