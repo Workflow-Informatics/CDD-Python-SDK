@@ -1,24 +1,17 @@
-__GET Methods to Implement:__
+# CDD-Python-API
+
+
+### A Python client for rapid execution of [CDD Vault API methods](https://support.collaborativedrug.com/hc/en-us/sections/115001607043-API-Function-Calls).
+
+
+# Known Issues
+
 
   - Molecules: finish adding help documentation for query parameters.
-  - Plot: TBD
   - Saved Search: TBD
 
-__POST Methods to Implement: done.__
 
-__PUT Methods to Implement: done.__
-
-__DELETE Methods to Implement: done.__
-
-__QOL Changes__:
-
- - Set dataframe indexes based on responses 
-
-
-# CDD-Python-API
-### A Python client for rapid execution of [CDD Vault API methods](https://support.collaborativedrug.com/hc/en-us/sections/115001607043-API-Function-Calls).
 * * *
-
 # Installation
 
 To install, run the following in a Git terminal:
@@ -36,7 +29,7 @@ python setup.py install
 ```python
 from cdd.VaultClient import VaultClient
 ```
-2. Instantiate a VaultClient to work with your data:
+2. Confirm your [User Permissions](https://support.collaborativedrug.com/hc/en-us/articles/214359023-Vault-User-Roles), then instantiate a VaultClient to work with your data:
 ```python
 vaultNum = 4598 # Insert your unique vault ID here.
 apiToken = os.environ["cddAPIToken"] # Insert your API token here.
@@ -80,7 +73,7 @@ vault.getMolecules(help=True)
 setVaultNumAndURL(vaultNum)
 ```
 __Description__: Sets the vault ID and constructs the base URL, from which endpoints for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
-__Returns__: `tuple` a two-element tuple consisting of the vault ID and the base URL for accessing the CDD Vault API.
+* __Returns__: `tuple` a two-element tuple consisting of the vault ID and the base URL for accessing the CDD Vault API.
 
 ```python
 setAPIKey(apiKey)
@@ -88,7 +81,7 @@ setAPIKey(apiKey)
 __Description__: Sets the API token credentials, which will be passed in the request header to CDD Vault with each API request. 
 
 	Note that the API token must have read/write access to the vault specified by the vault ID when executing the various API calls or an error will be returned.
-__Returns__: `str`
+* __Returns__: `str`
 
 ```python
 setMaxSyncObjects(value=1000)
@@ -100,7 +93,7 @@ __Description__: Sets the 'maxSyncObjects' attribute, which is used to determine
 Only used in methods where GET requests can be performed asynchronously: 
 	
 	Molecules, Batches, Plates, Protocols, and Protocol Data. See method sendSyncAndAsyncGets().
-__Returns__: `int`
+* __Returns__: `int`
 
 
 ## Batches
@@ -111,7 +104,7 @@ __Description__: Return a set or subset of batches from CDD vault.
 
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 
-__Valid Arguments__:
+__Additional Valid Arguments__:
 ```json
 "batches": "Comma-separated list of ids. Cannot be used with other parameters"
 
@@ -147,7 +140,7 @@ postBatches(data=None, help=False)
 ```
 __Description__: Creates a new batch in CDD Vault.
 
-* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
+* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
 
 ```python
 putBatches(self, id=None, data=None, help=False) 
@@ -155,7 +148,7 @@ putBatches(self, id=None, data=None, help=False)
 ```
 __Description__: Updates an existing batch in CDD Vault.
 
-* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update)
+* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update)
 
 	* An exception to this is the Molecule field - putBatches() method call should not be used to update 
 	the chemical structure of the parent Molecule. 
@@ -169,7 +162,7 @@ getMolecules(self, asDataFrame=True, help=False, **kwargs)
 ```
 __Description__: Return a list of molecules and their batches, based on optional parameters.
 
-__Valid Arguments__:
+__Additional Valid Arguments__:
 ```json
 "molecules": "Comma-separated list of ids (not molecule names!). Cannot be used with other parameters",
 
@@ -354,7 +347,7 @@ __Description__: Return a collection of plates from CDD vault.
 
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame. This parameter is ignored if an __id__ value has been set.
 
- __Valid Arguments__:
+ __Additional Valid Arguments__:
 ```json
 "plates": "Comma-separated list of ids.",
 			
@@ -377,7 +370,7 @@ deletePlates(id)
 ```
 __Description__: Deletes a single existing plate in CDD Vault using its plate ID.
 
-* __id `str`__ Unique ID for an existing plate in CDD vault.
+* __id `str` or `int`__ Unique ID for an existing plate in CDD vault.
 
 
 ## Plot
@@ -422,7 +415,7 @@ __Description__: Returns a list of accessible projects for the given vault.
 
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 
- __Valid Arguments__:
+ __Additional Valid Arguments__:
 ```json
 "protocols": "Comma-separated list of protocol ids. Cannot be used with other parameters",
 
@@ -458,3 +451,144 @@ __Description__: Returns a list of accessible projects for the given vault.
 ```
 	
 __Returns__: JSON `dict` or `pandas.DataFrame`
+
+
+
+## Protocol Data
+
+```python
+getProtocolData(id=None, asDataFrame=True, help=False, statusUpdates=True, **kwargs)
+```
+__Description__: Returns a filtered subset of the readout data for a single protocol using its protocol ID. 
+	
+	'id' argument is required, unless 'help' is set to True.
+
+ * __id `str` or `int`__ ID for the desired protocol.
+
+ * __asDataFrame `bool`__ Returns the json as a Pandas DataFrame.
+
+ * __statusUpdates `bool`__ Display status updates for the asynchronous export.
+
+ __Additional Valid Arguments__:
+```json
+"plates": "Comma-separated list of plate ids. Include only data for the specified plates.",
+
+"molecules": "Comma-separated list of molecule ids. Include only data for the specified molecules.",
+
+"runs_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or before the date",
+
+"runs_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or after the date.",
+
+"runs": "Comma-separated list of run ids for the given protocol. Include only data for runs listed.",
+
+"page_size": "The maximum # of objects to return.",
+
+"projects": "Comma-separated list of project ids. Defaults to all available projects. Limits scope of query.",
+
+"format": "'csv'
+			Generates a csv file which mimics the file generated when you choose the 'Export readouts' button 
+			from the Run-level 'Run Details' tab within the CDD Vault web interface.
+			When used as a keyword argument, this forces an asynchronous GET request.
+			All other keyword arguments will be ignored, EXCEPT for the 'runs' keyword."
+```
+__Returns__: JSON `dict` or `pandas.DataFrame`. Optionally writes .csv to file system.
+
+
+## Readout Rows
+
+```python
+putReadoutRows(id=None, data=None, help=False)
+```
+__Description__: Updates an existing readout row (including the ability to flag an existing readout row as an outlier).
+
+	Allows a user to update a specified row of Protocol data, set its value to null, or flag a specified row of Protocol data as an outlier.
+
+	Use getProtocolData() method with runs specified to ascertain the id of the readout row for the Protocol data you wish to edit.
+	
+	Use getProtocols() method to ascertain the readout definition IDs.
+
+ * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault. Required, unless 'help' is set to True.
+ 
+ * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
+
+
+```python
+deleteReadoutRows(id)
+```
+__Description__: Deletes a single readout row associated with protocol data in CDD Vault using its unique ID.
+
+ * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
+
+
+
+## Runs
+
+```python
+getRun(runID)
+```
+__Description__: Retrieve a single run using its unique run ID.
+
+ * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
+
+
+```python
+putRuns(id=None, data=None, help=False)
+```
+__Description__: Updates an existing run
+
+ * __id `str` or `int`__ unique id for an existing run object in CDD Vault.
+
+  * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update)
+
+		Fields not specified in the JSON are not changed. 
+		
+		Allows users to update the run's Project association,
+			as well as the Run_Date, Person, Place, and Conditions fields. 
+		
+		Required, unless 'help' is set to True. 
+
+```python
+deleteRuns(id, slurps=False)
+```
+__Description__: Delete one or more runs from CDD Vault
+
+ * __slurps `bool`__ If True, the id parameter will be interpreted as a [slurps ID](https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files). Specifies the slurp_id of an import operation. The user must have [appropriate permissions](https://support.collaborativedrug.com/hc/en-us/articles/214359023-Vault-User-Roles) to remove ALL runs in the slurp.
+		
+		All runs associated with the slurps ID will be deleted. 
+		
+		If user permissions are insufficient, no runs will be deleted.
+ 
+ * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
+
+
+ ## Slurps
+
+ ```python
+postSlurpsData(fileName, project, mappingTemplate=None, runs=None, interval=5.0)
+```
+
+__Description__: Bulk import endpoint for programmatic use. [CDD Support Topic](https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files)
+
+	Uses an existing mapping template to map the data in the import file into CDD Vault.
+	
+	Once a file has been uploaded through the API, data from the import is committed immediately unless there are errors or warnings.
+	
+	Any import errors or warnings (Suspicious Events) will cause the import to be REJECTED.
+
+ * __project `str` or `int`__ Required. Either the name or id of a single project. To use a project name, enter a `str`. To use a project id, enter an `int`.
+
+ * __mapping_template `str` or `int`__ The name (`str`) or id (`int`) of a mapping template that matches the attached file. If you choose to exclude this keyword:
+ 
+ 		CDD will attempt to use an existing template that matches the import file.
+
+		If none of the templates in your vault match, the import will be REJECTED
+
+		If more than one of the templates in your vault match, the import will be REJECTED
+ 
+ * __runs `dict`__ Optional. a single run detail object which will be applied to all new runs present in the file. Valid Keys:
+ ```json
+"run_date": use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today’s date.
+"place": This is the 'lab' condition in CDD. No default.
+"person": default value is user's full name.
+"conditions": no default value provided.
+```
