@@ -743,6 +743,8 @@ class VaultClient(object):
         :Description: returns (a subset of) the readout data for a single protocol using its protocol ID.
                       'id' argument is required, unless 'help' is set to True.
         
+        :statusUpdates: if true, displays status updates of asynchronous export to screen.              
+
         :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685426-Protocol-Data-GET-
         """
 
@@ -1045,7 +1047,7 @@ class VaultClient(object):
 
                       Valid keys include:
 
-                            :run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today’s date.
+                            :run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today's date.
 
                             :place: this field is called 'lab' within the CDD Vault web interface. No default value provided.
 
