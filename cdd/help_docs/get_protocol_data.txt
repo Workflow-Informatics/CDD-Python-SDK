@@ -1,0 +1,34 @@
+
+async: 
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+plates: 
+		Comma-separated list of plate ids. Include only data for the specified plates.
+
+molecules: 
+		Comma-separated list of molecule ids. Include only data for the specified molecules.
+
+runs_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or before the date.
+
+runs_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or after the date.
+
+runs: 
+		Comma-separated list of run ids for the given protocol. Include only data for runs listed.
+
+page_size: 
+		The maximum # of objects to return.
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.
+
+format: 
+		'csv' - generates a csv file which mimics the file generated when you choose the 'Export readouts' button
+				from the Run-level 'Run Details' tab within the CDD Vault web interface.
+
+				When used as a keyword argument, this forces an asynchronous GET request. All other keyword arguments will
+				be ignored, excluding the 'runs' keyword if included.

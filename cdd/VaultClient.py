@@ -26,1425 +26,1339 @@ import json
 import numpy as np
 import os
 import pandas as pd
+import re
 import requests
 import sys
 import time
 import zipfile
 
 
+helpDir = os.path.join(
+						os.path.dirname(__file__),
+						"help_docs")
+
+
 class VaultClient(object):
 
-    def __init__(self, vaultNum, apiKey):
+	def __init__(self, vaultNum, apiKey):
 
-        self.setVaultNumAndURL(vaultNum)
-        self.setAPIKey(apiKey)
+		self.setVaultNumAndURL(vaultNum)
+		self.setAPIKey(apiKey)
 
-        self.setMaxSyncObjects()
+		self.setMaxSyncObjects()
 
 
-    def __str__(self):
+	def __str__(self):
 
-        return f'Client for Vault ID: {self.vaultNum} instantiated {str(dt.datetime.now())}'
+		return f'Client for Vault ID: {self.vaultNum} instantiated {str(dt.datetime.now())}'
 
 
-    def setVaultNumAndURL(self, vaultNum):
-        """
-        :Description: sets the vault ID and constructs the base URL, from which endpoints
-                      for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
+	def setVaultNumAndURL(self, vaultNum):
+		"""
+		:Description: sets the vault ID and constructs the base URL, from which endpoints
+					  for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
 
-        :vaultNum (int or str): unique integer ID of the target vault.
+		:vaultNum (int or str): unique integer ID of the target vault.
 
-        :return (tuple): a two-element tuple consisting of the vault ID and the base URL for
-                         accessing the CDD Vault API.
-        """
+		:return (tuple): a two-element tuple consisting of the vault ID and the base URL for
+						 accessing the CDD Vault API.
+		"""
 
-        self.vaultNum = int(vaultNum)
+		self.vaultNum = int(vaultNum)
 
-        URL = "https://app.collaborativedrug.com/api/v1/vaults/"
-        URL = URL + str(vaultNum)
+		URL = "https://app.collaborativedrug.com/api/v1/vaults/"
+		URL = URL + str(vaultNum)
 
-        self.URL = URL
+		self.URL = URL
 
-        return (self.vaultNum, self.URL)
+		return (self.vaultNum, self.URL)
 
 
-    def getVaultNum(self):
-        """
-        :Description: returns the unique integer ID of the target vault.
+	def getVaultNum(self):
+		"""
+		:Description: returns the unique integer ID of the target vault.
 
-        :return (int): 
-        """
+		:return (int): 
+		"""
 
-        return self.vaultNum
-    
+		return self.vaultNum
+	
 
-    def getURL(self):
-        """
-        :Description: returns the base URL used in the construction of
-                      CDD Vault API calls (GET, POST, PUT, DELETE).
+	def getURL(self):
+		"""
+		:Description: returns the base URL used in the construction of
+					  CDD Vault API calls (GET, POST, PUT, DELETE).
 
-        :return (str):
-        """
+		:return (str):
+		"""
 
-        return self.URL
+		return self.URL
 
 
-    def setAPIKey(self, apiKey):
-        """
-        :Description: sets the API token credentials, which will be passed
-                      in the request header to CDD Vault with each API request. 
+	def setAPIKey(self, apiKey):
+		"""
+		:Description: sets the API token credentials, which will be passed
+					  in the request header to CDD Vault with each API request. 
 
-                      Note that the API token must have read/write access to
-                      the vault specified by the vault ID when executing the
-                      various API calls or an error will be returned.
+					  Note that the API token must have read/write access to
+					  the vault specified by the vault ID when executing the
+					  various API calls or an error will be returned.
 
-        :return (str):
-        """
+		:return (str):
+		"""
 
-        self.apiKey = apiKey
+		self.apiKey = apiKey
 
-        return self.apiKey
+		return self.apiKey
 
 
-    def getAPIKey(self):
-        """
-        :Description: returns the currently set API key.
+	def getAPIKey(self):
+		"""
+		:Description: returns the currently set API key.
 
-        :return (str):
-        """
+		:return (str):
+		"""
 
-        return self.apiKey
+		return self.apiKey
 
 
-    def setMaxSyncObjects(self, value=1000):
-        """
-        :Description: sets the 'maxSyncObjects' attribute, which is used to determine
-                      when a synchronous vs asynchronous export request is submitted
-                      to CDD. If the # of objects returned from a GET request is ever
-                      >= maxSyncObjects, the call will be repeated asynchronously.
+	def setMaxSyncObjects(self, value=1000):
+		"""
+		:Description: sets the 'maxSyncObjects' attribute, which is used to determine
+					  when a synchronous vs asynchronous export request is submitted
+					  to CDD. If the # of objects returned from a GET request is ever
+					  >= maxSyncObjects, the call will be repeated asynchronously.
 
-                      Defaults to 1000, the maximum # of objects which a CDD GET request
-                      can return synchronously.
+					  Defaults to 1000, the maximum # of objects which a CDD GET request
+					  can return synchronously.
 
-                      Only used in methods where GET requests can be performed asynchronously:
-                      Molecules, Batches, Plates, Protocols, and Protocol Data. See method
-                      sendSyncAndAsyncGets().
-        """
+					  Only used in methods where GET requests can be performed asynchronously:
+					  Molecules, Batches, Plates, Protocols, and Protocol Data. See method
+					  sendSyncAndAsyncGets().
+		"""
 
-        self.maxSyncObjects = value
+		self.maxSyncObjects = value
 
-        return self.maxSyncObjects
+		return self.maxSyncObjects
 
 
-    def formatHelp(self, valid_kwargs):
-        """
-        :Description: displays a help string describing the usage
-                      for a particular set of query parameters, for
-                      quick reference from Python.
-        """
+	def formatHelp(self, valid_kwargs):
+		"""
+		:Description: displays a help string describing the usage
+					  for a particular set of query parameters, for
+					  quick reference from Python.
 
-        helpString = ""
+					  This will soon be depracated.
+		"""
 
-        for prm in valid_kwargs: 
-            
-            helpString += f"\n\n\n{prm}:\n\n{valid_kwargs[prm]}"
+		helpString = ""
 
-        print(helpString)
-        return None
+		for prm in valid_kwargs: 
+			
+			helpString += f"\n\n\n{prm}:\n\n{valid_kwargs[prm]}"
 
+		print(helpString)
+		return None
 
-    def buildQueryString(self, kwargs, valid_kwargs):
-        """
-        :Description: Constructs the query string, which will be appended
-                      to the URL endpoint when making GET requests.
 
-        :return (str):
-        """
+	def getValidKwargs(self, fileName, displayHelp=False):
+		"""
+		:Description: retrieves a list of valid keyword arguments for a 
+					  specific CDD Vault API method from the method's 
+					  help documentation.
+					  
+					  Alternatively, prints the entire contents of the help document, 
+					  if displayHelp=True.
 
-        if len(kwargs) == 0: # No additional query parameters.
-            
-            return "" 
 
+		Valid keywords in help documentation files are identified by:
 
-        # Remove any invalid dictionary keys/parameters from kwargs + warn user, before constructing 
-        # the query string:
+			1) No white space characters at the start of the line.
 
-        for k in list(kwargs):
+			2) A final colon ":" character, after stripping all white space 
+			from the end of the line.
 
-            if k not in valid_kwargs: 
-                
-                del kwargs[k]
-                print(f"'{k}' is not a valid query parameter.")
 
-            else: kwargs[k] = str(kwargs[k]) # Ensure querys string only contains valid strings.
+		:fileName (str): the name of a valid file containing help documentation for
+						 a CDD Vault API method.
 
+		:displayHelp (bool): prints the help documentation for the specified
+							 file to the terminal, if true.
 
-        # Construct + return the query string:
+		: return (list of str):
+		"""
 
-        queryString = [f"{k}={v}" for k,v in kwargs.items()]
-        queryString = "?" + "&".join(queryString)
+		filePath = os.path.join(helpDir, fileName)
 
-        return queryString
+		doc = open(filePath).readlines()
 
+		if displayHelp:
 
-    def sendGetRequest(self, URL, asText=False, asBytes=False):
+			doc = "".join(doc)
+			print(doc)
+			
+			return
 
-        headers = {"X-CDD-Token": self.apiKey}
-        response = requests.get(URL, headers=headers)
+		# Parse help file + locate valid keyword arguments:
 
-        if asText and response.status_code == 200:
+		valid_kwargs = [line.rstrip() for line in doc]
+		valid_kwargs = [line for line in valid_kwargs if not re.match(r'\s', line)]
+		valid_kwargs = [line[:-1] for line in valid_kwargs if line.endswith(":")]
 
-            return response.text
+		return valid_kwargs
 
-        elif asBytes and response.status_code == 200:
 
-            return response.content
+	def buildQueryString(self, kwargs, valid_kwargs):
+		"""
+		:Description: Constructs the query string, which will be appended
+					  to the URL endpoint when making GET requests.
 
-        # Check for errors:
-        assert (response.status_code == 200), response.json()
+		:return (str):
+		"""
 
-        return response.json()
+		if len(kwargs) == 0: # No additional query parameters.
+			
+			return "" 
 
 
-    def sendSyncAndAsyncGets(self, suffix, kwargs, valid_kwargs):
-        """
-        :Description: for methods where GET requests can be performed
-                      both synchronously and asynchronously, data will
-                      first be retrieved using a syncronous GET request.
+		# Remove any invalid dictionary keys/parameters from kwargs + warn user, before constructing 
+		# the query string:
 
-                      If the # of objects returned is >= 'maxSyncObjects'
-                      attribute, the request will be repeated asynchronously
-                      to avoid any loss of data.
-        """
+		for k in list(kwargs):
 
-        kwargs["page_size"] = self.maxSyncObjects
-        queryString = self.buildQueryString(kwargs, valid_kwargs)
+			if k not in valid_kwargs: 
+				
+				del kwargs[k]
+				print(f"'{k}' is not a valid query parameter.")
 
-        URL = self.URL + suffix + queryString
+			else: kwargs[k] = str(kwargs[k]) # Ensure querys string only contains valid strings.
 
-        objects = self.sendGetRequest(URL)
 
-        if "count" in objects and objects["count"] >= (self.maxSyncObjects - 1):
+		# Construct + return the query string:
 
-            kwargs["async"] = "true"
-            queryString = self.buildQueryString(kwargs, valid_kwargs)
-            URL = self.URL + suffix + queryString
+		queryString = [f"{k}={v}" for k,v in kwargs.items()]
+		queryString = "?" + "&".join(queryString)
 
-            exportID =self.sendGetRequest(URL)["id"]
-            objects = self.getAsyncExport(exportID)
+		return queryString
 
-            if type(objects) == dict and objects["status"] == "canceled": 
-                
-                sys.exit(1)
 
-        else: objects = objects["objects"]
+	def sendGetRequest(self, URL, asText=False, asBytes=False):
 
-        return objects
+		headers = {"X-CDD-Token": self.apiKey}
+		response = requests.get(URL, headers=headers)
 
+		if asText and response.status_code == 200:
 
-    def getAsyncExport(self, exportID, interval=5.0, asText=False, asBytes=False, statusUpdates=True):
-        """
-        :Description: used to both check the status of an in-progress CDD asynchronous export,
-                      as well as retrieve the data once the export has been completed.
+			return response.text
 
-                      Example output: 
-                      
-                      {'id': 19211628, 'created_at': '2022-11-03T02:02:12.000Z', 
-                                        'modified_at': '2022-11-03T02:02:12.000Z', 'status': 'started'}
+		elif asBytes and response.status_code == 200:
 
-        :asText: determines whether the data in response is returned as a json (default behavior) or a string.
+			return response.content
 
-        :asBytes: determines whether the data in response is returned as bytes.
+		# Check for errors:
+		assert (response.status_code == 200), response.json()
 
-        :statusUpdates (bool): if true, displays status updates of asynchronous export to screen.
+		return response.json()
 
-        :return: json output.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-
-        """
+	def sendSyncAndAsyncGets(self, suffix, kwargs, valid_kwargs):
+		"""
+		:Description: for methods where GET requests can be performed
+					  both synchronously and asynchronously, data will
+					  first be retrieved using a syncronous GET request.
 
-        try:
-            suffix = f"/export_progress/{exportID}"
-            URL = self.URL + suffix
+					  If the # of objects returned is >= 'maxSyncObjects'
+					  attribute, the request will be repeated asynchronously
+					  to avoid any loss of data.
+		"""
 
-            nonErrorStates = ["new", "started", "finished"] 
-            # ^Any export status except these 3 should return an error.
+		kwargs["page_size"] = self.maxSyncObjects
+		queryString = self.buildQueryString(kwargs, valid_kwargs)
 
-            while True:
+		URL = self.URL + suffix + queryString
 
-                response = self.sendGetRequest(URL)
-                if statusUpdates: print(response)
-                status = response["status"]
+		objects = self.sendGetRequest(URL)
 
-                assert status in nonErrorStates, f"Export status '{status}' indicates the export has failed to complete."
+		if "count" in objects and objects["count"] >= (self.maxSyncObjects - 1):
 
-                if status == "finished": break
+			kwargs["async"] = "true"
+			queryString = self.buildQueryString(kwargs, valid_kwargs)
+			URL = self.URL + suffix + queryString
 
-                time.sleep(interval) # CDD-recommended time-interval for export checks is 5-10 sec.
+			exportID =self.sendGetRequest(URL)["id"]
+			objects = self.getAsyncExport(exportID)
 
-        except KeyboardInterrupt as e: # Cancels in-progress asynchronous export.
+			if type(objects) == dict and objects["status"] == "canceled": 
+				
+				sys.exit(1)
 
-            delResponse = self.deleteExport(exportID)
-            if statusUpdates: print(delResponse)
+		else: objects = objects["objects"]
 
-            return delResponse
+		return objects
 
-        
-        # Get export data:
-        
-        suffix = f"/exports/{exportID}"
-        URL = self.URL + suffix
 
-        if asText:
+	def getAsyncExport(self, exportID, interval=5.0, asText=False, asBytes=False, statusUpdates=True):
+		"""
+		:Description: used to both check the status of an in-progress CDD asynchronous export,
+					  as well as retrieve the data once the export has been completed.
 
-            response = self.sendGetRequest(URL, asText=asText)
-            return response
+					  Example output: 
+					  
+					  {'id': 19211628, 'created_at': '2022-11-03T02:02:12.000Z', 
+										'modified_at': '2022-11-03T02:02:12.000Z', 'status': 'started'}
 
-        elif asBytes:
+		:asText: determines whether the data in response is returned as a json (default behavior) or a string.
 
-            response = self.sendGetRequest(URL, asBytes=asBytes)
-            return response
+		:asBytes: determines whether the data in response is returned as bytes.
 
-        response = self.sendGetRequest(URL)["objects"]
-        return response
+		:statusUpdates (bool): if true, displays status updates of asynchronous export to screen.
 
+		:return: json output.
 
-    def getBatches(self, asDataFrame=True, help=False, **kwargs):
-        """
-        :Description: return a collection of batches from CDD vault. 
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-
-        """
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-
+		"""
 
-        # Construct URL:
+		try:
+			suffix = f"/export_progress/{exportID}"
+			URL = self.URL + suffix
 
-        valid_kwargs = {"batches": 
-                                    "Comma-separated list of ids.\n"
-                                    "Cannot be used with other parameters",
-                        
-                        "no_structures": "Boolean. If true, omit structure representations\n" 
-                                         "for a smaller and faster response. Default: false",
+			nonErrorStates = ["new", "started", "finished"] 
+			# ^Any export status except these 3 should return an error.
 
-                        "only_ids": "Boolean. If true, only the Batch IDs are returned,\n" 
-                                    "allowing for a smaller and faster response. Default: false",
+			while True:
 
-                        "created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "molecule_created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "molecule_created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+				response = self.sendGetRequest(URL)
+				if statusUpdates: print(response)
+				status = response["status"]
 
-                        "page_size": "The maximum # of objects to return.",
+				assert status in nonErrorStates, f"Export status '{status}' indicates the export has failed to complete."
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query.",
-                        
-                        "data_sets": "Comma-separated list of public data set ids.\n"
-                                     "Defaults to no data sets. Limits scope of query.",
+				if status == "finished": break
 
-                        "molecule_batch_identifier": "A Molecule-Batch ID used to query the Vault.\n" 
-                                                     "Use this parameter to limit the number of Molecule UDF Fields to return",
+				time.sleep(interval) # CDD-recommended time-interval for export checks is 5-10 sec.
 
-                        "molecule_fields": "Array of Molecule field names to include in the resulting JSON.\n"
-                                           "Use this parameter to limit the number of Molecule UDF Fields to return.",
+		except KeyboardInterrupt as e: # Cancels in-progress asynchronous export.
 
-                        "batch_fields": "Array of Batch field names to include in the resulting JSON.\n"
-                                        "Use this parameter to limit the number of Batch UDF Fields to return.",
+			delResponse = self.deleteExport(exportID)
+			if statusUpdates: print(delResponse)
 
-                        "fields_search": "Array of Batch field names & values. Used to filter Batches returned based on query values"}
+			return delResponse
 
+		
+		# Get export data:
+		
+		suffix = f"/exports/{exportID}"
+		URL = self.URL + suffix
 
-        if help: return self.formatHelp(valid_kwargs)
+		if asText:
 
-        # Get batches + format output:
+			response = self.sendGetRequest(URL, asText=asText)
+			return response
 
-        suffix = "/batches"
+		elif asBytes:
 
-        batches = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+			response = self.sendGetRequest(URL, asBytes=asBytes)
+			return response
 
-        if asDataFrame: batches = pd.DataFrame.from_dict(batches)
+		response = self.sendGetRequest(URL)["objects"]
+		return response
 
-        return batches
 
+	def getBatches(self, asDataFrame=True, displayHelp=False, **kwargs):
+		"""
+		:Description: return a collection of batches from CDD vault. 
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-
+		"""
 
-    def getDatasets(self, asDataFrame=True):
-        """
-        :Description: returns a list of accessible public data sets for the given vault.
+		# Retrieve valid keyword arguments from help documentation:
 
-        :return: either a json list or a Pandas DataFrame.
+		helpDoc = "get_batches.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-        :reference: https://support.collaborativedrug.com/hc/en-us/articles/115005693443-Data-Sets-GET-
-        """
+		if displayHelp: return
 
-        suffix = "/data_sets"
-        URL = self.URL + suffix
 
-        datasets = self.sendGetRequest(URL=URL)
-        if asDataFrame: datasets = pd.DataFrame(datasets)
-            
-        return datasets
+		# Get batches + format output:
 
+		suffix = "/batches"
 
-    def getELNEntries(self, summary=True, asDataFrame=True, 
-                      exportPath=None, unzipELNEntries=False, help=False, **kwargs):
-        """
-        :Description: returns information on the ELN entries for the specified vault.
+		batches = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-        :summary (bool): if true, returns summary data for the requested ELN entries.
+		if asDataFrame: batches = pd.DataFrame.from_dict(batches)
 
-        :asDataFrame (bool): returns the summary as a Pandas DataFrame. Only relevant if summary=True.
+		return batches
 
-        :exportPath (str): file path for extracting zipped ELN entries to. Only relevant if summary=False.
 
-        :unzipELNEntries (bool): if true, extracts the zip contents of exportPath to a directory.
+	def getDatasets(self, asDataFrame=True):
+		"""
+		:Description: returns a list of accessible public data sets for the given vault.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
-        """
+		:return: either a json list or a Pandas DataFrame.
 
-        valid_kwargs = {"eln_entries": "Comma-separated list of ELN entry IDs",
+		:reference: https://support.collaborativedrug.com/hc/en-us/articles/115005693443-Data-Sets-GET-
+		"""
 
-                        "author": "Comma separated list of ELN author ID's.\n"
-                                  "Note: Must be users' ID's, users' names cannot be used",
+		suffix = "/data_sets"
+		URL = self.URL + suffix
 
-                        "status": "Returns ELN entries that have the status specified.\n" 
-                                  "Valid status values are: 'open', 'submitted', or 'finalized'.",
+		datasets = self.sendGetRequest(URL=URL)
+		if asDataFrame: datasets = pd.DataFrame(datasets)
+			
+		return datasets
 
-                        "only_ids": "Boolean. If true, only the ELN entry ID's are returned,\n" 
-                                    "allowing for a smaller and faster response. Default: false",
 
-                        "created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "submitted_date_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "submitted_date_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "finalized_date_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "finalized_date_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+	def getELNEntries(self, summary=True, asDataFrame=True, 
+					  exportPath=None, unzipELNEntries=False, displayHelp=False, **kwargs):
+		"""
+		:Description: returns information on the ELN entries for the specified vault.
 
+		:summary (bool): if true, returns summary data for the requested ELN entries.
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query."}
+		:asDataFrame (bool): returns the summary as a Pandas DataFrame. Only relevant if summary=True.
 
-        if help: return self.formatHelp(valid_kwargs)
+		:exportPath (str): file path for extracting zipped ELN entries to. Only relevant if summary=False.
 
-        # Retrieve summary ELN data:
+		:unzipELNEntries (bool): if true, extracts the zip contents of exportPath to a directory.
 
-        if summary:
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
+		"""
 
-            suffix = "/eln/entries" + self.buildQueryString(kwargs, valid_kwargs)
-            URL = self.URL + suffix
+		# Retrieve valid keyword arguments from help documentation:
 
-            elnEntries = self.sendGetRequest(URL)["objects"]
-            if asDataFrame: elnEntries = pd.DataFrame(elnEntries)
+		helpDoc = "get_ELN_entries.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-            return elnEntries
+		if displayHelp: return
 
 
-        # Retrieve zipped copy of ELN entries + optional extraction:
+		# Retrieve summary ELN data:
 
-        suffix = "/eln/entries?async=true" + self.buildQueryString(kwargs, valid_kwargs)
-        URL = self.URL + suffix
+		if summary:
 
-        exportID = self.sendGetRequest(URL=URL)["id"]
-        elnEntries = self.getAsyncExport(exportID=exportID, asBytes=True)
+			suffix = "/eln/entries" + self.buildQueryString(kwargs, valid_kwargs)
+			URL = self.URL + suffix
 
-        if not exportPath.endswith(".zip"): exportPath += ".zip"
-        with open(exportPath, "wb") as f: f.write(elnEntries)
+			elnEntries = self.sendGetRequest(URL)["objects"]
+			if asDataFrame: elnEntries = pd.DataFrame(elnEntries)
 
-        if unzipELNEntries:
+			return elnEntries
 
-            directory = os.path.splitext(exportPath)[0]
-            with zipfile.ZipFile(exportPath, "r") as z:
 
-                z.extractall(directory)
+		# Retrieve zipped copy of ELN entries + optional extraction:
 
+		suffix = "/eln/entries?async=true" + self.buildQueryString(kwargs, valid_kwargs)
+		URL = self.URL + suffix
 
-    def getFields(self, asDataFrame=True):
-        """
-        :Description: returns a list of available fields for the given vault.
+		exportID = self.sendGetRequest(URL=URL)["id"]
+		elnEntries = self.getAsyncExport(exportID=exportID, asBytes=True)
 
-                      This API call will provide you with the “type” and “name” values of *all* fields within a Vault. 
-                      The json keys returned by this API call are organized into the following:
+		if not exportPath.endswith(".zip"): exportPath += ".zip"
+		with open(exportPath, "wb") as f: f.write(elnEntries)
 
-                      internal, batch, molecule, protocol
+		if unzipELNEntries:
 
-        :return: either a json dict or a dict where each value is a Pandas DataFrame.
+			directory = os.path.splitext(exportPath)[0]
+			with zipfile.ZipFile(exportPath, "r") as z:
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/6392675849876-Fields-GET-
-        """
+				z.extractall(directory)
 
-        suffix = "/fields"
-        URL = self.URL + suffix
 
-        fields = self.sendGetRequest(URL)
-        if asDataFrame: 
-            
-            fields = {k:pd.DataFrame.from_dict(fields[k]) for k in fields}
+	def getFields(self, asDataFrame=True):
+		"""
+		:Description: returns a list of available fields for the given vault.
 
-        return fields
+					  This API call will provide you with the “type” and “name” values of *all* fields within a Vault. 
+					  The json keys returned by this API call are organized into the following:
 
+					  internal, batch, molecule, protocol
 
-    def getFile(self, fileID, destFolder=None):
-        """
-        :Description: retrieves a single file object from CDD Vault using its file ID.
+		:return: either a json dict or a dict where each value is a Pandas DataFrame.
 
-        :destFolder (str): destination folder where file contents should be written to.
-                           File name will default to the original name of the file when
-                           it was uploaded to CDD Vault.
-        """
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/6392675849876-Fields-GET-
+		"""
 
-        suffix = f"/files/{fileID}"
-        URL = self.URL + suffix
+		suffix = "/fields"
+		URL = self.URL + suffix
 
-        response = self.sendGetRequest(URL)
+		fields = self.sendGetRequest(URL)
+		if asDataFrame: 
+			
+			fields = {k:pd.DataFrame.from_dict(fields[k]) for k in fields}
 
-        contents = response["contents"]
-        contents = base64.b64decode(contents) # Decodes base64-encoded file contents.
+		return fields
 
-        if destFolder:
 
-            fName = response["name"]
-            destPath = os.path.join(destFolder, fName)
+	def getFile(self, fileID, destFolder=None):
+		"""
+		:Description: retrieves a single file object from CDD Vault using its file ID.
 
-            with open(destPath, "wb") as f: f.write(contents)
+		:destFolder (str): destination folder where file contents should be written to.
+						   File name will default to the original name of the file when
+						   it was uploaded to CDD Vault.
+		"""
 
-        return contents
+		suffix = f"/files/{fileID}"
+		URL = self.URL + suffix
 
+		response = self.sendGetRequest(URL)
 
-    def getMappingTemplates(self, id=None, asDataFrame=True):
-        """
-        :Description: returns summary information on all available mapping templates in the Vault specified.
+		contents = response["contents"]
+		contents = base64.b64decode(contents) # Decodes base64-encoded file contents.
 
-                      Alternatively, if 'id' argument is set, will retrieve details on the data objects mapped 
-                      within a specific mapping template.
+		if destFolder:
 
-                      Additional fields when id argument is set include:
+			fName = response["name"]
+			destPath = os.path.join(destFolder, fName)
 
-                        A 'header_mappings' section that identifies the field/readout each header is mapped to.
+			with open(destPath, "wb") as f: f.write(contents)
 
-                        A 'file' section that provides details on the original file used to create the template.
+		return contents
 
 
-        :asDataFrame: returns the json as a Pandas DataFrame. This prm is ignored, if an id value has been set.
+	def getMappingTemplates(self, id=None, asDataFrame=True):
+		"""
+		:Description: returns summary information on all available mapping templates in the Vault specified.
 
-        :return: either a json dict or a Pandas DataFrame.
+					  Alternatively, if 'id' argument is set, will retrieve details on the data objects mapped 
+					  within a specific mapping template.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/4413839788436-Mapping-Templates-GET-
-        """
+					  Additional fields when id argument is set include:
 
-        if id is None:
+						A 'header_mappings' section that identifies the field/readout each header is mapped to.
 
-            suffix = "/mapping_templates"
-            URL = self.URL + suffix
+						A 'file' section that provides details on the original file used to create the template.
 
-            response = self.sendGetRequest(URL)
-            if asDataFrame: response = pd.DataFrame.from_dict(response)
 
-        else:
+		:asDataFrame: returns the json as a Pandas DataFrame. This prm is ignored, if an id value has been set.
 
-            suffix = f"/mapping_templates/{id}"
-            URL = self.URL + suffix
+		:return: either a json dict or a Pandas DataFrame.
 
-            response = self.sendGetRequest(URL)
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/4413839788436-Mapping-Templates-GET-
+		"""
 
-        return response
+		if id is None:
 
+			suffix = "/mapping_templates"
+			URL = self.URL + suffix
 
-    def getMolecules(self, asDataFrame=True, help=False, **kwargs):
-        """
-        :Description: return a list of molecules and their batches, based on optional parameters.
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-
-        """
+			response = self.sendGetRequest(URL)
+			if asDataFrame: response = pd.DataFrame.from_dict(response)
 
-        # Construct URL:
+		else:
 
-        valid_kwargs = {"molecules": 
-                                    "Comma-separated list of ids (not molecule names!).\n"
-                                    "Cannot be used with other parameters",
+			suffix = f"/mapping_templates/{id}"
+			URL = self.URL + suffix
 
-                        "names": "Comma-separated list of names/synonyms.",
+			response = self.sendGetRequest(URL)
 
-                        "no_structures": "Boolean. If true, omit structure representations\n" 
-                                         "for a smaller and faster response. Default: false",
+		return response
 
-                        "only_ids": "Boolean. If true, only the Molecule IDs are returned,\n" 
-                                    "allowing for a smaller and faster response. Default: false",
 
-                        "created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+	def getMolecules(self, asDataFrame=True, help=False, displayHelp=False, **kwargs):
+		"""
+		:Description: return a list of molecules and their batches, based on optional parameters.
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-
+		"""
 
-                        "batch_created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "batch_created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "batch_field_before_name": "Batch field name",
-                        "batch_field_before_date": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "batch_field_after_name": "Batch field name",
-                        "batch_field_after_date": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+		# Retrieve valid keyword arguments from help documentation:
 
+		helpDoc = "get_molecules.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-                        "page_size": "The maximum # of objects to return.",
+		if displayHelp: return
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query.",
 
-                        "data_sets": "Comma-separated list of public data set ids.\n"
-                                     "Defaults to no data sets. Limits scope of query.",
+		# Send request to CDD API:
 
-                        "structure": "SMILES, cxsmiles or mol string for the query structure.\n"
-                                     "Returns Molecules from the Vault that match the structure-based\n" 
-                                     "query submitted via this API call.",
+		suffix = "/molecules"
 
-                        "structure_search_type": "Available options are: 'exact', 'similarity' or 'substructure'.\n"
-                                                 "Default option is substructure.",
+		molecules = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-                        "structure_similarity_threshold": "A number between 0 and 1. Include this parameter only if the structure_search_type is 'similarity'.",
+		if asDataFrame: molecules = pd.DataFrame.from_dict(molecules)
 
-                        "inchikey": "A valid InchiKey. Use this parameter instead of the \"structure\" and\n" 
-                                    "\"structure_search_type\" parameters.",
+		return molecules
 
-                        "molecule_fields": "Array of Molecule field names to include in the resulting JSON.\n"
-                                           "Use this parameter to limit the number of Molecule UDF Fields to return.",
 
-                        "batch_fields": "Array of Batch field names to include in the resulting JSON.\n"
-                                        "Use this parameter to limit the number of Batch UDF Fields to return.",
+	def getPlates(self, asDataFrame=True, displayHelp=False, **kwargs):
+		"""
+		:Description: return a collection of plates from CDD vault. 
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-DELETE-
+		"""
+						
+		# Retrieve valid keyword arguments from help documentation:
 
-                        "fields_search": "Array of Molecule field names & values. Used to filter Molecules returned based on query values"}
+		helpDoc = "get_plates.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
+		if displayHelp: return
 
-        if help: return self.formatHelp(valid_kwargs)
 
-        # Get molecules + format output:
+		# Get plates + format output:
 
-        suffix = "/molecules"
+		suffix = "/plates"
 
-        molecules = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+		plates = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-        if asDataFrame: molecules = pd.DataFrame.from_dict(molecules)
+		if asDataFrame: plates = pd.DataFrame.from_dict(plates)
 
-        return molecules
+		return plates
 
 
-    def getPlates(self, asDataFrame=True, help=False, **kwargs):
-        """
-        :Description: return a collection of plates from CDD vault. 
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-DELETE-
-        """
+	def getPlot(self, batchID, protocolID, size="small", destFolder=None):
+		"""
+		:Description:
+		"""
 
-        # Construct URL:
+		assert size in ["small", "medium", "large"], "Not a valid value."
 
-        valid_kwargs = {"plates": "Comma-separated list of ids.",
-                                    
-                        "names": "Comma-delimited list of plate names.",
+		suffix = f"/batches/{batchID}/protocols/{protocolID}/plot"
 
-                        "locations": "Comma-delimited list of plate locations.",
+		URL = self.URL + suffix + f"?{size}"; print(URL)
 
-                        "page_size": "The maximum # of objects to return.",
+		response = self.sendGetRequest(URL=URL)
+		print(response)
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query."}
-                        
 
-        if help: return self.formatHelp(valid_kwargs)
+	def getProtocols(self, asDataFrame=True, displayHelp=False, **kwargs):
+		"""
+		:Description: returns a list of protocols based on criteria as specified by parameters:
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685406-Protocol-s-GET-
+		"""
 
-        # Get plates + format output:
+		# Retrieve valid keyword arguments from help documentation:
 
-        suffix = "/plates"
+		helpDoc = "get_protocols.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-        plates = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+		if displayHelp: return
 
-        if asDataFrame: plates = pd.DataFrame.from_dict(plates)
 
-        return plates
+		# Send request to CDD API:
 
+		suffix = f"/protocols"
 
-    def getPlot(self, batchID, protocolID, size="small", destFolder=None):
-        """
-        :Description:
-        """
+		protocols = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-        assert size in ["small", "medium", "large"], "Not a valid value."
+		if asDataFrame: protocols = pd.DataFrame.from_dict(protocols)
 
-        suffix = f"/batches/{batchID}/protocols/{protocolID}/plot"
+		return protocols
 
-        URL = self.URL + suffix + f"?{size}"; print(URL)
 
-        response = self.sendGetRequest(URL=URL)
-        print(response)
+	def getProtocolData(self, id=None, asDataFrame=True, displayHelp=False, statusUpdates=True, **kwargs):
+		"""
+		:Description: returns (a subset of) the readout data for a single protocol using its protocol ID.
+					  'id' argument is required, unless 'help' is set to True.
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685426-Protocol-Data-GET-
+		"""
 
+		# Retrieve valid keyword arguments from help documentation:
 
-    def getProtocols(self, asDataFrame=True, help=False, **kwargs):
-        """
-        :Description: returns a list of protocols based on criteria as specified by parameters:
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685406-Protocol-s-GET-
-        """
+		helpDoc = "get_protocol_data.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-        # Construct URL:
+		if displayHelp: return
 
-        valid_kwargs = {"protocols": 
-                                    "Comma-separated list of protocol ids.\n"
-                                    "Cannot be used with other parameters",
 
-                        "names": "Comma-separated list of protocol names.\n"
-                                  "Cannot be used with other parameters.",
+		# Get protocol data + format output:
 
-                        "only_ids": "Boolean. If true, only the Protocol IDs are returned,\n" 
-                                    "allowing for a smaller and faster response. Default: false",
+		suffix = f"/protocols/{id}/data" 
 
-                        "created_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "created_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "runs_modified_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
-                        "runs_modified_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm)",
+		if "format" in kwargs: # Special behavior for when 'format' arg is included.
 
-                        "plates": "Comma-separated list of plate ids.",
+			kwargs = {k:v for k,v in kwargs.items() if k in ["format", "runs"]}
+			queryString = self.buildQueryString(kwargs, valid_kwargs)
 
-                        "molecules": "Comma-separated list of molecule ids.",
+			URL = self.URL + suffix + queryString
 
-                        "page_size": "The maximum # of objects to return.",
+			exportID = self.sendGetRequest(URL)["id"]
+			data = self.getAsyncExport(exportID, statusUpdates=statusUpdates, asText=True)
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query.",
+			return data
 
-                        "data_sets": "Comma-separated list of public data set ids.\n"
-                                     "Defaults to no data sets. Limits scope of query.",
-                         
-                        "slurp": "Specify the slurp_id of an import operation.\n"
-                                 "Once an import has been committed, you can return\n" 
-                                 "additional JSON results that will expose the Protocol\n" 
-                                 "and Run(s) of data that were imported."}
 
+		data = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-        if help: return self.formatHelp(valid_kwargs)
-            
-        # Get protocols + format output:
+		if asDataFrame: data = pd.DataFrame.from_dict(data)
 
-        suffix = "/protocols"
+		return data
 
-        protocols = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
 
-        if asDataFrame: protocols = pd.DataFrame.from_dict(protocols)
+	def getProjects(self, asDataFrame=True):
+		"""
+		:Description: returns a list of accessible projects for the given vault.
 
-        return protocols
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005693423-Projects-GET-
+		"""
 
+		suffix = "/projects"
+		URL = self.URL + suffix
 
-    def getProtocolData(self, id=None, asDataFrame=True, help=False, statusUpdates=True, **kwargs):
-        """
-        :Description: returns (a subset of) the readout data for a single protocol using its protocol ID.
-                      'id' argument is required, unless 'help' is set to True.
-        
-        :statusUpdates: if true, displays status updates of asynchronous export to screen.              
+		projects = self.sendGetRequest(URL)
+		if asDataFrame: projects = pd.DataFrame.from_dict(projects)
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685426-Protocol-Data-GET-
-        """
+		return projects
 
-        # Construct URL:
 
-        valid_kwargs = {"plates": "Comma-separated list of plate ids. Include only data for the specified plates.",
+	def getReadoutRows(self, asDataFrame=True, displayHelp=False, **kwargs):
+		"""
+		:Description: returns (a subset of) the readout data for any number of protocols.
 
-                        "molecules": "Comma-separated list of molecule ids. Include only data for the specified molecules.",
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-
+		"""
 
-                        "runs_before": "Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or before the date",
+		# Retrieve valid keyword arguments from help documentation:
 
-                        "runs_after": "Date (YYYY-MM-DDThh:mm:ss±hh:mm). Include only data for runs on or after the date.",
+		helpDoc = "get_readout_rows.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
 
-                        "runs": "Comma-separated list of run ids for the given protocol. Include only data for runs listed.",
+		if displayHelp: return
 
-                        "page_size": "The maximum # of objects to return.",
 
-                        "projects": "Comma-separated list of project ids.\n"
-                                    "Defaults to all available projects.\n"
-                                    "Limits scope of query.",
+		# Send request to CDD API:
 
-                        "format": "'csv' - generates a csv file which mimics the file generated when you choose the 'Export readouts' button\n" 
-                                  "from the Run-level 'Run Details' tab within the CDD Vault web interface.\n"
+		suffix = f"/readout_rows"
 
-                                  "When used as a keyword argument, this forces an asynchronous GET request. All other keyword arguments will\n"
-                                  "be ignored, excluding the 'runs' keyword if included."}
+		readoutRows = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+		if asDataFrame: readoutRows = pd.DataFrame(readoutRows)
 
+		return readoutRows
 
-        if help: return self.formatHelp(valid_kwargs)
 
-        # Get protocol data + format output:
+	def getRun(self, runID):
+		"""
+		:Description: retrieve a single run using its unique run ID.
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE- 
+		"""
 
-        suffix = f"/protocols/{id}/data" 
+		suffix = f"/runs/{runID}"
+		URL = self.URL + suffix
 
-        if "format" in kwargs: # Special behavior for when 'format' arg is included.
+		run = self.sendGetRequest(URL)
 
-            kwargs = {k:v for k,v in kwargs.items() if k in ["format", "runs"]}
-            queryString = self.buildQueryString(kwargs, valid_kwargs)
+		return run
 
-            URL = self.URL + suffix + queryString
 
-            exportID = self.sendGetRequest(URL)["id"]
-            data = self.getAsyncExport(exportID, statusUpdates=statusUpdates, asText=True)
+	def sendPostRequest(self, URL, jsonObj):
+		"""
+		:Description: general method for sending POST requests to CDD vault.
 
-            return data
+					  'jsonObj' must either be a valid json object, or a string
+					  file path pointing to a valid json file.
 
+		"""
 
-        data = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+		if isinstance(jsonObj, str):
+			
+			jsonObj = json.load(open(jsonObj, "r"))
 
-        if asDataFrame: data = pd.DataFrame.from_dict(data)
+		
+		headers = {"X-CDD-Token": self.apiKey}
 
-        return data
+		response = requests.post(URL, headers=headers, json=jsonObj)
 
+		# Check for errors:
+		assert (response.status_code == 200), response.json()
+		
+		return response.json()
 
-    def getProjects(self, asDataFrame=True):
-        """
-        :Description: returns a list of accessible projects for the given vault.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005693423-Projects-GET-
-        """
+	def postBatches(self, data=None, help=False):
+		"""
+		:Description: creates a new batch in CDD Vault.
 
-        suffix = "/projects"
-        URL = self.URL + suffix
+		:data: required, unless 'help' is set to True. Must be either a valid json object,
+			   or a string file path to a valid json file.
 
-        projects = self.sendGetRequest(URL)
-        if asDataFrame: projects = pd.DataFrame.from_dict(projects)
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-
+		"""
 
-        return projects
+		# Construct URL:
 
+		allowedJsonKeys = {"class": "Optional. If present, must be 'batch'.",
 
-    def getRun(self, runID):
-        """
-        :Description: retrieve a single run using its unique run ID.
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE- 
-        """
+						   "molecule": "See create a molecule when creating new molecules in a vault at:\n\n"
+									   "https://support.collaborativedrug.com/hc/en-us/articles/115005685466#create",
 
-        suffix = f"/runs/{runID}"
-        URL = self.URL + suffix
+						   "name": "String (required).",
 
-        run = self.sendGetRequest(URL)
+						   "projects": "An array of project ids and/or names (Required).",
 
-        return run
+						   "batch_fields": "Each vault has its own settings on the minimum information required to create a new Batch.\n" 
+										   "For a Vault Administrator, see Settings > Vault > Batch Fields, to change which Batch fields are required.\n\n"
 
+										   "{<batch_field_name>: <batch_field_value>, ... }",
 
-    def sendPostRequest(self, URL, jsonObj):
-        """
-        :Description: general method for sending POST requests to CDD vault.
+						   "salt_name": "A two-letter code or Salt vendor string as listed here: https://app.collaborativedrug.com/support/salts.\n"  
+										"The salt is determined automatically when the salt is included in the molecular structure.",
 
-                      'jsonObj' must either be a valid json object, or a string
-                      file path pointing to a valid json file.
+						   "solvent_of_crystallization_name": "Name of the solvent.",
 
-        """
+						   "stoichiometry": "{\n"
+											"\t\"core_count\": <integer>,\n"
+											"\t\"salt_count\": <integer>,\n"
+											"\t\"solvent_of_crystallization_count\": <integer>\n"
+											"}" }
 
-        if isinstance(jsonObj, str):
-            
-            jsonObj = json.load(open(jsonObj, "r"))
 
-        
-        headers = {"X-CDD-Token": self.apiKey}
 
-        response = requests.post(URL, headers=headers, json=jsonObj)
+		if help: return self.formatHelp(allowedJsonKeys)
+	
+		suffix = "/batches"
+		URL = self.URL + suffix
+		
 
-        # Check for errors:
-        assert (response.status_code == 200), response.json()
-        
-        return response.json()
+		# Post batch to CDD Vault + get response:
 
+		response = self.sendPostRequest(URL, data)
 
-    def postBatches(self, data=None, help=False):
-        """
-        :Description: creates a new batch in CDD Vault.
+		return response
 
-        :data: required, unless 'help' is set to True. Must be either a valid json object,
-               or a string file path to a valid json file.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-
-        """
+	def postELNEntries(self, project, title=None, eln_fields={}):
+		"""
+		:Description: creates a new ELN entry.
 
-        # Construct URL:
+		:project (str): the project ID or name where the new ELN entry will be created.
 
-        allowedJsonKeys = {"class": "Optional. If present, must be 'batch'.",
+		:title (str): the title of the new ELN entry.
 
-                           "molecule": "See create a molecule when creating new molecules in a vault at:\n\n"
-                                       "https://support.collaborativedrug.com/hc/en-us/articles/115005685466#create",
+		:eln_fields (dict): a set of configured ELN field/value pairs which have been set by
+							a Vault Administrator for the specified vault.
 
-                           "name": "String (required).",
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
+		"""
 
-                           "projects": "An array of project ids and/or names (Required).",
+		suffix = "/eln/entries"
+		URL = self.URL + suffix
 
-                           "batch_fields": "Each vault has its own settings on the minimum information required to create a new Batch.\n" 
-                                           "For a Vault Administrator, see Settings > Vault > Batch Fields, to change which Batch fields are required.\n\n"
+		data = {
+				"title": title,
+				"project": project,
+				"eln_fields": eln_fields
+		}
 
-                                           "{<batch_field_name>: <batch_field_value>, ... }",
+		response = self.sendPostRequest(URL, data)
 
-                           "salt_name": "A two-letter code or Salt vendor string as listed here: https://app.collaborativedrug.com/support/salts.\n"  
-                                        "The salt is determined automatically when the salt is included in the molecular structure.",
+		return response
 
-                           "solvent_of_crystallization_name": "Name of the solvent.",
 
-                           "stoichiometry": "{\n"
-                                            "\t\"core_count\": <integer>,\n"
-                                            "\t\"salt_count\": <integer>,\n"
-                                            "\t\"solvent_of_crystallization_count\": <integer>\n"
-                                            "}" }
+	def postFiles(self, objectType, objectID, fileName):
+		"""
+		:Description: attaches a file to an object (Run, Molecule, Protocol or ELN entry).
 
+		:objectType (str): specifies the CDD object type to which the file will be attached.
+						   Value must be one of: 'molecule', 'protocol', 'run', or 'eln_entry'.
 
+		:objectID (int or str): an existing uid for a run, molecule, protocol, or ELN entry object.
 
-        if help: return self.formatHelp(allowedJsonKeys)
-    
-        suffix = "/batches"
-        URL = self.URL + suffix
-        
+		:fileName (str): path to a valid file for upload to CDD.
 
-        # Post batch to CDD Vault + get response:
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
+		"""
 
-        response = self.sendPostRequest(URL, data)
+		# Start w/ error-handling:
 
-        return response
+		validObjects = ["molecule", "protocol", "run", "eln_entry"]
 
+		assert objectType in validObjects, f"\n'{objectType}' is not a valid CDD class object for attaching files.\nValid options include: {validObjects}."
 
-    def postELNEntries(self, project, title=None, eln_fields={}):
-        """
-        :Description: creates a new ELN entry.
+		if not os.path.exists(fileName): raise FileNotFoundError(fileName)
 
-        :project (str): the project ID or name where the new ELN entry will be created.
 
-        :title (str): the title of the new ELN entry.
+		# Construct URL:
 
-        :eln_fields (dict): a set of configured ELN field/value pairs which have been set by
-                            a Vault Administrator for the specified vault.
+		suffix = "/files"
+		URL = self.URL + suffix
+		
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
-        """
+		# Post file to CDD Vault + get response:
+		# Does not use standard sendPostRequest() method, since request uses form-multipart.
 
-        suffix = "/eln/entries"
-        URL = self.URL + suffix
+		headers = {"X-CDD-Token": self.apiKey}
 
-        data = {
-                "title": title,
-                "project": project,
-                "eln_fields": eln_fields
-        }
+		files = {"file": (os.path.basename(fileName), open(fileName, "rb")),
+				 "resource_class": (None, objectType),
+				 "resource_id": (None, objectID)}
 
-        response = self.sendPostRequest(URL, data)
+		response = requests.post(URL, headers=headers, files=files)
+		assert (response.status_code == 200), response.json()
 
-        return response
+		return response.json()
+	
 
+	def postMolecules(self, data=None, help=False):
+		"""
+		:Description: registers a new molecule in CDD Vault.
 
-    def postFiles(self, objectType, objectID, fileName):
-        """
-        :Description: attaches a file to an object (Run, Molecule, Protocol or ELN entry).
+		:data: required, unless 'help' is set to True. Must be either a valid json object,
+			   or a string file path to a valid json file.
 
-        :objectType (str): specifies the CDD object type to which the file will be attached.
-                           Value must be one of: 'molecule', 'protocol', 'run', or 'eln_entry'.
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-
+		"""
 
-        :objectID (int or str): an existing uid for a run, molecule, protocol, or ELN entry object.
+		# Construct URL:
 
-        :fileName (str): path to a valid file for upload to CDD.
+		allowedJsonKeys = {"class": "Optional. If present, must be 'molecule'.",
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
-        """
+						"name": "String (required).",
 
-        # Start w/ error-handling:
+						"smiles": "Only one of these [smiles, csxmiles, molfile, structure] may be present.\n" 
+						"'structure' accepts SMILES strings or Molfiles as values.\n" 
+						"For molfiles, replace all new lines with \\n (JSON requirement)",
 
-        validObjects = ["molecule", "protocol", "run", "eln_entry"]
+						"cxsmiles": "See smiles entry.",
 
-        assert objectType in validObjects, f"\n'{objectType}' is not a valid CDD class object for attaching files.\nValid options include: {validObjects}."
+						"molfile": "See smiles entry.",
 
-        if not os.path.exists(fileName): raise FileNotFoundError(fileName)
+						"structure": "See smiles entry.",
 
+						"description": "String.",
 
-        # Construct URL:
+						"synonyms": "An array of strings.",
 
-        suffix = "/files"
-        URL = self.URL + suffix
-        
+						"udfs": "{<udf_name>: <udf_value>, ... }",
 
-        # Post file to CDD Vault + get response:
-        # Does not use standard sendPostRequest() method, since request uses form-multipart.
+						"projects": "An array of project ids and/or names (Required).",
 
-        headers = {"X-CDD-Token": self.apiKey}
+						"collections": "An array of project ids and/or names." }
 
-        files = {"file": (os.path.basename(fileName), open(fileName, "rb")),
-                 "resource_class": (None, objectType),
-                 "resource_id": (None, objectID)}
 
-        response = requests.post(URL, headers=headers, files=files)
-        assert (response.status_code == 200), response.json()
+		if help: return self.formatHelp(allowedJsonKeys)
+	
+		suffix = "/molecules"
+		URL = self.URL + suffix
+		
 
-        return response.json()
-    
+		# Post molecule to CDD Vault + get response:
 
-    def postMolecules(self, data=None, help=False):
-        """
-        :Description: registers a new molecule in CDD Vault.
+		response = self.sendPostRequest(URL, data)
 
-        :data: required, unless 'help' is set to True. Must be either a valid json object,
-               or a string file path to a valid json file.
+		return response
+	
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-
-        """
+	def postSlurpsData(self, fileName, project, mappingTemplate=None, runs=None, interval=5.0):
+		"""
+		:Description: bulk import for programmatically importing data into CDD Vault. Uses an existing mapping template to map the data in the
+					  import file into CDD Vault. Once a file has been uploaded through the API, data from the import is committed immediately 
+					  unless there are errors or warnings. Any import errors or warnings (Suspicious Events) will cause the import to be REJECTED.
 
-        # Construct URL:
+		:project (int or str): required. Either the name or id of a single project. Names should be passed as strings and id's should be
+							   passed as integers.
 
-        allowedJsonKeys = {"class": "Optional. If present, must be 'molecule'.",
+		:mapping_template (int or str): optional. The name or id of a mapping template that matches the attached file. If not provided, 
+										a mapping template that matches the file will be used. If there is more than one matching template, 
+										an error will be raised. Similar to projects - names should be passed as strings and id's as integers. 
 
-                        "name": "String (required).",
+										See getMappingTemplates() method for a list of available mapping templates in the current vault.
 
-                        "smiles": "Only one of these [smiles, csxmiles, molfile, structure] may be present.\n" 
-                        "'structure' accepts SMILES strings or Molfiles as values.\n" 
-                        "For molfiles, replace all new lines with \\n (JSON requirement)",
+		:runs (dict): a single run detail object which will be applied to all new runs present in the file.
 
-                        "cxsmiles": "See smiles entry.",
+					  Valid keys include:
 
-                        "molfile": "See smiles entry.",
+							:run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today’s date.
 
-                        "structure": "See smiles entry.",
+							:place: this field is called 'lab' within the CDD Vault web interface. No default value provided.
 
-                        "description": "String.",
+							:person: default value is user's full name.
 
-                        "synonyms": "An array of strings.",
+							:conditions: no default value provided.
 
-                        "udfs": "{<udf_name>: <udf_value>, ... }",
+		Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files
+		"""
 
-                        "projects": "An array of project ids and/or names (Required).",
+		# Read-in file prm for import:
+		
+		files = {
+				"file": (os.path.basename(fileName), open(fileName, "rb"))
+				}
 
-                        "collections": "An array of project ids and/or names." }
+		# Read-in json prm for import:
 
+		jsonObj = {"project": project}
 
-        if help: return self.formatHelp(allowedJsonKeys)
-    
-        suffix = "/molecules"
-        URL = self.URL + suffix
-        
+		if mappingTemplate: jsonObj["mapping_template"] = mappingTemplate
+		if runs: 
+			
+			validKeys = ["run_date", "place", "person", "conditions"]
+			for k in runs: 
+				
+				assert k in validKeys, f"'{k}' is not a valid key for a run detail object."
 
-        # Post molecule to CDD Vault + get response:
+			jsonObj["runs"] = runs
+			
+		jsonObj = json.dumps(jsonObj)
 
-        response = self.sendPostRequest(URL, data)
 
-        return response
-    
+		# Send request to initiate bulk upload:
 
-    def postSlurpsData(self, fileName, project, mappingTemplate=None, runs=None, interval=5.0):
-        """
-        :Description: bulk import for programmatically importing data into CDD Vault. Uses an existing mapping template to map the data in the
-                      import file into CDD Vault. Once a file has been uploaded through the API, data from the import is committed immediately 
-                      unless there are errors or warnings. Any import errors or warnings (Suspicious Events) will cause the import to be REJECTED.
+		suffix = "/slurps"
+		URL = self.URL + suffix
 
-        :project (int or str): required. Either the name or id of a single project. Names should be passed as strings and id's should be
-                               passed as integers.
+		headers = {"X-CDD-Token": self.apiKey}
 
-        :mapping_template (int or str): optional. The name or id of a mapping template that matches the attached file. If not provided, 
-                                        a mapping template that matches the file will be used. If there is more than one matching template, 
-                                        an error will be raised. Similar to projects - names should be passed as strings and id's as integers. 
+		response = requests.post(URL, headers=headers, files=files, data={"json": jsonObj})
+		assert (response.status_code == 200), response.json()
 
-                                        See getMappingTemplates() method for a list of available mapping templates in the current vault.
 
-        :runs (dict): a single run detail object which will be applied to all new runs present in the file.
+		# Check status of bulk upload until completed:
 
-                      Valid keys include:
+		slurpID = response.json()["id"]
+		state = response.json()["state"]
 
-                            :run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today's date.
+		URL = self.URL + f"/slurps/{slurpID}"
 
-                            :place: this field is called 'lab' within the CDD Vault web interface. No default value provided.
+		while state not in ["committed", "canceled", "rejected", "invalid"]:
 
-                            :person: default value is user's full name.
+			time.sleep(interval)
 
-                            :conditions: no default value provided.
+			exportResponse = requests.get(URL, headers=headers).json()
+			state = exportResponse["state"]
+			
+		assert state == "committed", exportResponse
 
-        Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files
-        """
 
-        # Read-in file prm for import:
-        
-        files = {
-                "file": (os.path.basename(fileName), open(fileName, "rb"))
-                }
+		# Get protocol + run information for successful imports using slurps ID:
 
-        # Read-in json prm for import:
+		URL = self.URL + f"/protocols?slurp={slurpID}"
 
-        jsonObj = {"project": project}
+		outputResponse = requests.get(URL, headers=headers)
+		assert outputResponse.status_code == 200, outputResponse.json()
 
-        if mappingTemplate: jsonObj["mapping_template"] = mappingTemplate
-        if runs: 
-            
-            validKeys = ["run_date", "place", "person", "conditions"]
-            for k in runs: 
-                
-                assert k in validKeys, f"'{k}' is not a valid key for a run detail object."
+		return outputResponse.json()
 
-            jsonObj["runs"] = runs
-            
-        jsonObj = json.dumps(jsonObj)
 
+	def sendPutRequest(self, URL, jsonObj):
+		"""
+		:Description: general method for sending PUT requests to CDD vault.
 
-        # Send request to initiate bulk upload:
+					  'jsonObj' must either be a valid json object, or a string
+					  file path pointing to a valid json file.
 
-        suffix = "/slurps"
-        URL = self.URL + suffix
+		"""
 
-        headers = {"X-CDD-Token": self.apiKey}
+		if isinstance(jsonObj, str):
 
-        response = requests.post(URL, headers=headers, files=files, data={"json": jsonObj})
-        assert (response.status_code == 200), response.json()
+			jsonObj = json.load(open(jsonObj, "r"))
 
+		
+		headers = {"X-CDD-Token": self.apiKey}
 
-        # Check status of bulk upload until completed:
+		response = requests.put(URL, headers=headers, json=jsonObj)
 
-        slurpID = response.json()["id"]
-        state = response.json()["state"]
+		# Check for errors:
+		assert (response.status_code == 200), response.json()
+		
+		return response.json()
 
-        URL = self.URL + f"/slurps/{slurpID}"
 
-        while state not in ["committed", "canceled", "rejected", "invalid"]:
+	def putBatches(self, id=None, data=None, help=False):
+		"""
+		:Description: updates an existing batch. 
 
-            time.sleep(interval)
+		:id (int or str): unique id for an existing batch object in CDD Vault.
+						  Required, unless 'help' is set to True.
 
-            exportResponse = requests.get(URL, headers=headers).json()
-            state = exportResponse["state"]
-            
-        assert state == "committed", exportResponse
+		:data: Must be either a valid json object, or a string file path to a valid json file. 
 
+			   Fields not specified in the JSON are not changed. See postBatches() method for valid fields.
+			   An exception to this is the Molecule field - putBatches() method call should not be used to update 
+			   the chemical structure of the parent Molecule. Instead, use the putMolecules() method to achieve this.
+			   Required, unless 'help' is set to True. 
 
-        # Get protocol + run information for successful imports using slurps ID:
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update
+		"""
 
-        URL = self.URL + f"/protocols?slurp={slurpID}"
+		# Construct URL:
 
-        outputResponse = requests.get(URL, headers=headers)
-        assert outputResponse.status_code == 200, outputResponse.json()
+		if help: return self.postBatches(help=True) # help=True calls help from postBatches() method, since inputs are the same.
+	
+		suffix = f"/batches/{id}"
+		URL = self.URL + suffix
+		
 
-        return outputResponse.json()
+		# Put batch to CDD Vault + get response:
 
+		response = self.sendPutRequest(URL, data)
 
-    def sendPutRequest(self, URL, jsonObj):
-        """
-        :Description: general method for sending PUT requests to CDD vault.
+		return response   
 
-                      'jsonObj' must either be a valid json object, or a string
-                      file path pointing to a valid json file.
 
-        """
+	def putMolecules(self, id=None, data=None, help=False):
+		"""
+		:Description: updates an existing molecule. Some keys behave differently when used with
+					  putMolecules() vs. postMolecules(). Run with help=True for more details.
 
-        if isinstance(jsonObj, str):
+		:id (int or str): unique id for an existing molecule object in CDD Vault.
+						  Required, unless 'help' is set to True.
 
-            jsonObj = json.load(open(jsonObj, "r"))
+		:data: Must be either a valid json object, or a string file path to a valid json file. 
+			   Fields not specified in the JSON are not changed. See postMolecules() method for valid fields.
+			   Required, unless 'help' is set to True. 
 
-        
-        headers = {"X-CDD-Token": self.apiKey}
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update
+		"""
 
-        response = requests.put(URL, headers=headers, json=jsonObj)
+		# Construct URL:
 
-        # Check for errors:
-        assert (response.status_code == 200), response.json()
-        
-        return response.json()
+		allowedJsonKeys = {
+						"name": "If this field is supplied, the old name is automatically added as a synonym.\n" 
+								"To delete a molecule name, you must exclude it from the list of synonyms.\n"
+								"Names cannot be changed in registration vaults.",
 
+						"synonyms": "If supplied, the list of synonyms replaces the existing list.",
 
-    def putBatches(self, id=None, data=None, help=False):
-        """
-        :Description: updates an existing batch. 
+						"udfs": "Only fields explicitly mentioned will be changed.\n" 
+								"A user-defined field can be removed by using the value null (no quotes)."
+						}
 
-        :id (int or str): unique id for an existing batch object in CDD Vault.
-                          Required, unless 'help' is set to True.
 
-        :data: Must be either a valid json object, or a string file path to a valid json file. 
+		if help: return self.formatHelp(allowedJsonKeys)
+	
+		suffix = f"/molecules/{id}"
+		URL = self.URL + suffix
+		
 
-               Fields not specified in the JSON are not changed. See postBatches() method for valid fields.
-               An exception to this is the Molecule field - putBatches() method call should not be used to update 
-               the chemical structure of the parent Molecule. Instead, use the putMolecules() method to achieve this.
-               Required, unless 'help' is set to True. 
+		# Put molecule to CDD Vault + get response:
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update
-        """
+		response = self.sendPutRequest(URL, data)
 
-        # Construct URL:
+		return response   
 
-        if help: return self.postBatches(help=True) # help=True calls help from postBatches() method, since inputs are the same.
-    
-        suffix = f"/batches/{id}"
-        URL = self.URL + suffix
-        
 
-        # Put batch to CDD Vault + get response:
+	def putRuns(self, id=None, data=None, help=False):
+		"""
+		:Description: updates an existing run. 
 
-        response = self.sendPutRequest(URL, data)
+		:id (int or str): unique id for an existing run object in CDD Vault.
+						  Required, unless 'help' is set to True.
 
-        return response   
+		:data: Must be either a valid json object, or a string file path to a valid json file. 
 
+			   Fields not specified in the JSON are not changed. Allows users to update the run Project association 
+			   and the Run_Date, Person, Place, and Conditions fields. Required, unless 'help' is set to True. 
 
-    def putMolecules(self, id=None, data=None, help=False):
-        """
-        :Description: updates an existing molecule. Some keys behave differently when used with
-                      putMolecules() vs. postMolecules(). Run with help=True for more details.
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update
+		"""
 
-        :id (int or str): unique id for an existing molecule object in CDD Vault.
-                          Required, unless 'help' is set to True.
+		# Construct URL:
 
-        :data: Must be either a valid json object, or a string file path to a valid json file. 
-               Fields not specified in the JSON are not changed. See postMolecules() method for valid fields.
-               Required, unless 'help' is set to True. 
+		if help: 
+			
+			print("No additional help defined.")
+			return 
+	
+		suffix = f"/runs/{id}"
+		URL = self.URL + suffix
+		
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update
-        """
+		# Put run to CDD Vault + get response:
 
-        # Construct URL:
+		response = self.sendPutRequest(URL, data)
 
-        allowedJsonKeys = {
-                        "name": "If this field is supplied, the old name is automatically added as a synonym.\n" 
-                                "To delete a molecule name, you must exclude it from the list of synonyms.\n"
-                                "Names cannot be changed in registration vaults.",
-
-                        "synonyms": "If supplied, the list of synonyms replaces the existing list.",
-
-                        "udfs": "Only fields explicitly mentioned will be changed.\n" 
-                                "A user-defined field can be removed by using the value null (no quotes)."
-                        }
-
-
-        if help: return self.formatHelp(allowedJsonKeys)
-    
-        suffix = f"/molecules/{id}"
-        URL = self.URL + suffix
-        
-
-        # Put molecule to CDD Vault + get response:
-
-        response = self.sendPutRequest(URL, data)
-
-        return response   
-
-
-    def putRuns(self, id=None, data=None, help=False):
-        """
-        :Description: updates an existing run. 
-
-        :id (int or str): unique id for an existing run object in CDD Vault.
-                          Required, unless 'help' is set to True.
-
-        :data: Must be either a valid json object, or a string file path to a valid json file. 
-
-               Fields not specified in the JSON are not changed. Allows users to update the run Project association 
-               and the Run_Date, Person, Place, and Conditions fields. Required, unless 'help' is set to True. 
-
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update
-        """
-
-        # Construct URL:
-
-        if help: 
-            
-            print("No additional help defined.")
-            return 
-    
-        suffix = f"/runs/{id}"
-        URL = self.URL + suffix
-        
-
-        # Put run to CDD Vault + get response:
-
-        response = self.sendPutRequest(URL, data)
-
-        return response   
+		return response   
  
 
-    def putReadoutRows(self, id=None, data=None, help=False):
-        """
-        :Description: updates an existing readout row (including the ability to flag an existing readout row as an outlier).
+	def putReadoutRows(self, id=None, data=None, help=False):
+		"""
+		:Description: updates an existing readout row (including the ability to flag an existing readout row as an outlier).
 
-                      Allows a user to update a specified row of Protocol data, set its value to null, or flag a specified 
-                      row of Protocol data as an outlier.
+					  Allows a user to update a specified row of Protocol data, set its value to null, or flag a specified 
+					  row of Protocol data as an outlier.
 
-                      Use getProtocolData() method with runs specified to ascertain the id of the readout row for the Protocol data you wish to edit.
-                      Use getProtocols() method to ascertain the readout definition IDs.
-                      
+					  Use getProtocolData() method with runs specified to ascertain the id of the readout row for the Protocol data you wish to edit.
+					  Use getProtocols() method to ascertain the readout definition IDs.
+					  
 
-        :id (int or str): unique id for an existing readout row object in CDD Vault.
-                          Required, unless 'help' is set to True.
+		:id (int or str): unique id for an existing readout row object in CDD Vault.
+						  Required, unless 'help' is set to True.
 
-        :data: Must be either a valid json object, or a string file path to a valid json file. 
+		:data: Must be either a valid json object, or a string file path to a valid json file. 
 
-               :Example Usage: { 
-                            "readouts": { 
-                            "283130": {"value": ">99"}, 
-                            "283131": {"value": 77},
-                            "283132": {"value": null},
-                            "283133": {"outlier": true}} 
-                            }
+			   :Example Usage: { 
+							"readouts": { 
+							"283130": {"value": ">99"}, 
+							"283131": {"value": 77},
+							"283132": {"value": null},
+							"283133": {"outlier": true}} 
+							}
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-PUT-DELETE-#update
-        """
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-PUT-DELETE-#update
+		"""
 
-        # Construct URL:
+		# Construct URL:
 
-        if help: 
-            
-            print("No additional help defined.")
-            return 
-    
-        suffix = f"/readout_rows/{id}"
-        URL = self.URL + suffix
-        
+		if help: 
+			
+			print("No additional help defined.")
+			return 
+	
+		suffix = f"/readout_rows/{id}"
+		URL = self.URL + suffix
+		
 
-        # Put readout row to CDD Vault + get response:
+		# Put readout row to CDD Vault + get response:
 
-        response = self.sendPutRequest(URL, data)
+		response = self.sendPutRequest(URL, data)
 
-        return response   
-    
+		return response   
+	
 
-    def sendDeleteRequest(self, URL):
+	def sendDeleteRequest(self, URL):
 
-        headers = {"X-CDD-Token": self.apiKey}
-        response = requests.delete(URL, headers=headers)
+		headers = {"X-CDD-Token": self.apiKey}
+		response = requests.delete(URL, headers=headers)
 
-        # Check for errors:
-        assert (response.status_code == 200), response.json()
-        
-        return response.json()
-
-
-    def deleteFiles(self, fileID):
-        """
-        :Description: deletes a single file attached to an object (Run, Molecule, Protocol or ELN entry)
-                      using its unique file ID.
-
-        :fileID (int or str): unique ID for an existing file in CDD vault.
-
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
-        """
-
-        # Construct URL:
-
-        suffix = f"/files/{fileID}"
-        URL = self.URL + suffix
-        
-        # Delete file present in CDD Vault + get response:
-        
-        response = self.sendDeleteRequest(URL)
-        
-        return response
+		# Check for errors:
+		assert (response.status_code == 200), response.json()
+		
+		return response.json()
 
 
-    def deleteBatches(self, id):
-        """
-        :Description: deletes a batch present in CDD Vault.
+	def deleteFiles(self, fileID):
+		"""
+		:Description: deletes a single file attached to an object (Run, Molecule, Protocol or ELN entry)
+					  using its unique file ID.
 
-                      Note that for safety/security purposes, batches which have data associated with them cannot be deleted 
-                      via this method call. Data (such as rows of readout data in a Protocol Run) must be removed prior to using 
-                      this method call to delete a Batch.
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update
-        """
+		:fileID (int or str): unique ID for an existing file in CDD vault.
 
-        # Note that batch deletes are actually performed using PUT requests, which must be submitted with an empty
-        # projects array for the specified batch id.
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
+		"""
 
-        return self.putBatches(id, data={"projects": []})
+		# Construct URL:
 
-
-    def deleteExport(self, id):
-        """
-        :Description: deletes an in-progress asynchronous export.
-
-                      Primarily used during keyboard interrupts in the
-                      getAsyncExport() method.
-
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-DELETE-
-        """
-
-        # Construct URL:
-
-        suffix = f"/exports/{id}"
-        URL = self.URL + suffix
-        
-        # Delete running asynchronous export in CDD Vault + retrieve response:
-        
-        response = self.sendDeleteRequest(URL)
-        
-        return response
+		suffix = f"/files/{fileID}"
+		URL = self.URL + suffix
+		
+		# Delete file present in CDD Vault + get response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
 
 
-    def deleteMolecules(self, id):
-        """
-        :Description: deletes a molecule present in CDD Vault.
-        
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update
-        """
+	def deleteBatches(self, id):
+		"""
+		:Description: deletes a batch present in CDD Vault.
 
-        # Note that molecule deletes are actually performed using PUT requests, which must be submitted with an empty
-        # projects array for the specified molecule id.
+					  Note that for safety/security purposes, batches which have data associated with them cannot be deleted 
+					  via this method call. Data (such as rows of readout data in a Protocol Run) must be removed prior to using 
+					  this method call to delete a Batch.
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update
+		"""
 
-        return self.putMolecules(id, data={"projects": []})
+		# Note that batch deletes are actually performed using PUT requests, which must be submitted with an empty
+		# projects array for the specified batch id.
 
-
-    def deletePlates(self, id):
-        """
-        :Description: deletes a single existing plate in CDD Vault using its plate ID.
-
-        :id (int or str): unique ID for an existing plate in CDD vault.
-
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-DELETE-#delete
-        """
-
-        # Construct URL:
-
-        suffix = f"/plates/{id}"
-        URL = self.URL + suffix
-        
-        # Delete plate present in CDD Vault + get response:
-        
-        response = self.sendDeleteRequest(URL)
-        
-        return response
+		return self.putBatches(id, data={"projects": []})
 
 
-    def deleteReadoutRows(self, id):
-        """
-        :Description: deletes a single readout row associated with protocol data in CDD Vault using its unique ID.
+	def deleteExport(self, id):
+		"""
+		:Description: deletes an in-progress asynchronous export.
 
-        :id (int or str): unique ID for an existing readout row in CDD vault.
+					  Primarily used during keyboard interrupts in the
+					  getAsyncExport() method.
 
-        :Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-PUT-DELETE-#delete
-        """
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685506-Async-Export-GET-DELETE-
+		"""
 
-        # Construct URL:
+		# Construct URL:
 
-        suffix = f"/readout_rows/{id}"
-        URL = self.URL + suffix
-        
-        # Delete a single readout row of protocol data + get response:
-        
-        response = self.sendDeleteRequest(URL)
-        
-        return response
+		suffix = f"/exports/{id}"
+		URL = self.URL + suffix
+		
+		# Delete running asynchronous export in CDD Vault + retrieve response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
 
 
-    def deleteRuns(self, id, slurps=False):
-        """
-        :Description: either deletes a single run from CDD vault or deletes all runs associated with a 
-                      single slurps upload.
+	def deleteMolecules(self, id):
+		"""
+		:Description: deletes a molecule present in CDD Vault.
+		
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update
+		"""
 
-        :id (int or str): must be either an existing run ID if slurps=False, otherwise a valid slurps ID.
+		# Note that molecule deletes are actually performed using PUT requests, which must be submitted with an empty
+		# projects array for the specified molecule id.
 
-        :slurps (bool): if True, id will be interpreted as a slurps ID. Specifies the slurp_id of an import operation.
-                        All runs associated with the slurps ID will be deleted if the user has permissions for all runs. If not, no runs will be deleted.
+		return self.putMolecules(id, data={"projects": []})
 
-        Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-
-        """
-        
-        # Construct URL:
 
-        if slurps: suffix = f"/runs?slurp={id}"
-        else: suffix = f"/runs/{id}"
+	def deletePlates(self, id):
+		"""
+		:Description: deletes a single existing plate in CDD Vault using its plate ID.
 
-        URL = self.URL + suffix
+		:id (int or str): unique ID for an existing plate in CDD vault.
 
-        # Delete runs present in CDD Vault + get response:
-        
-        response = self.sendDeleteRequest(URL)
-        
-        return response
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-DELETE-#delete
+		"""
+
+		# Construct URL:
+
+		suffix = f"/plates/{id}"
+		URL = self.URL + suffix
+		
+		# Delete plate present in CDD Vault + get response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
+
+
+	def deleteReadoutRows(self, id):
+		"""
+		:Description: deletes a single readout row associated with protocol data in CDD Vault using its unique ID.
+
+		:id (int or str): unique ID for an existing readout row in CDD vault.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-PUT-DELETE-#delete
+		"""
+
+		# Construct URL:
+
+		suffix = f"/readout_rows/{id}"
+		URL = self.URL + suffix
+		
+		# Delete a single readout row of protocol data + get response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
+
+
+	def deleteRuns(self, id, slurps=False):
+		"""
+		:Description: either deletes a single run from CDD vault or deletes all runs associated with a 
+					  single slurps upload.
+
+		:id (int or str): must be either an existing run ID if slurps=False, otherwise a valid slurps ID.
+
+		:slurps (bool): if True, id will be interpreted as a slurps ID. Specifies the slurp_id of an import operation.
+						All runs associated with the slurps ID will be deleted if the user has permissions for all runs. If not, no runs will be deleted.
+
+		Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-
+		"""
+		
+		# Construct URL:
+
+		if slurps: suffix = f"/runs?slurp={id}"
+		else: suffix = f"/runs/{id}"
+
+		URL = self.URL + suffix
+
+		# Delete runs present in CDD Vault + get response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
 
