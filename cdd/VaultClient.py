@@ -36,8 +36,8 @@ from io import StringIO
 
 
 helpDir = os.path.join(
-						os.path.dirname(__file__),
-						"help_docs")
+				os.path.dirname(__file__),
+				"help_docs")
 
 
 class VaultClient(object):
