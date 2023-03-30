@@ -32,6 +32,8 @@ import sys
 import time
 import zipfile
 
+from io import StringIO
+
 
 helpDir = os.path.join(
 						os.path.dirname(__file__),
@@ -742,6 +744,123 @@ class VaultClient(object):
 		run = self.sendGetRequest(URL)
 
 		return run
+
+
+	def getSavedSearches(self, searchID=None, format="csv", zip=False, filePath=None, 
+										asDataFrame=True, displayHelp=False, **kwargs):
+		"""
+		:Description: returns either a list of available saved searches if 'searchID' is not specified
+					  or executes a saved search using the specified 'searchID'.
+
+		:searchID (int or str): unique ID for the target saved search. If no search ID
+								is provided, will return a list of available saved searches
+								along with their corresponding ID's.
+
+		:format (str): valid values are: 'csv', 'xlsx', or 'sdf'. 
+
+					   If format is csv or xlsx, contents will be returned as a DataFrame if 'zip=False'.
+
+					   If format is sdf or 'zip=True', contents will be written to a file instead.
+
+					   'filePath' argument must be set whenever writing to file.
+		
+		:zip (bool): if True, saved search results will be return as a zip file.
+
+		:filePath (str): a file path where the results from the saved search should be written to.
+						 Must be provided if 'zip=True' or 'format=sdf'.
+
+		:asDataFrame (bool): whether to return the search results as a Pandas DataFrame.
+							 This is only used if 'searchID=None' which is the default.
+
+		:displayHelp (bool): displays available keyword arguments for the API call + exits.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005699026-Saved-Search-es-GET-
+		"""
+		
+		def getData():
+
+			# Retrieve the saved search data using an async export.
+			# Return as bytes object, regardless of request format.
+
+			suffix = f"/searches/{searchID}"
+
+			# Update query string with format + zip prm values:
+
+			localZip = {True: "true", False: "false"}.get(zip)
+
+			kwargs.update({"format": format, "zip": localZip})
+
+			queryString = self.buildQueryString(kwargs, valid_kwargs)
+
+			# Send request to CDD API:
+
+			URL = self.URL + suffix + queryString
+
+			exportID = self.sendGetRequest(URL)["id"]
+
+			data = self.getAsyncExport(exportID, asBytes=True)
+
+			return data
+
+
+		def writeToFile(data):
+
+			# Writes the bytes for saved search data to file.
+
+			assert filePath is not None, "Must specify a destination path."
+
+			with open(filePath, "wb") as f: f.write(data)
+
+
+		def parseBytes(rawData):
+
+			# Read bytes into a Pandas DataFrame, for xlsx or csv data.
+
+			if format == "csv": 
+				
+				parsedData = StringIO(rawData.decode("utf-8"))
+				parsedData = pd.read_csv(parsedData)
+
+			else: parsedData = pd.read_excel(rawData)
+
+			return parsedData
+
+
+		# Retrieve valid keyword arguments from help documentation:
+
+		helpDoc = "get_saved_searches.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
+
+		if displayHelp: return
+
+
+		# Retrieve list of available saved searches, if no search ID is provided:
+
+		suffix = f"/searches"
+
+		if searchID is None:
+
+			URL = self.URL + suffix
+
+			savedSearches = self.sendGetRequest(URL)
+
+			if asDataFrame: savedSearches = pd.DataFrame(savedSearches)
+
+			return savedSearches
+
+
+		# Perform saved search using the specified ID + retrieve search results:
+
+		rawData = getData()
+
+		if filePath or zip or format == "sdf": 
+			
+			writeToFile(rawData)
+			return
+
+		savedSearches = parseBytes(rawData)
+		
+		return savedSearches
 
 
 	def sendPostRequest(self, URL, jsonObj):
