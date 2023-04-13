@@ -7,6 +7,7 @@ setup(
     author = 'Workflow Informatics Corp.',
     author_email = 'chris.lowden@workflowinformatics.com',
     packages = find_packages(include=["cdd"]),
+    include_package_data=True,
     install_requires = [
                         'numpy',
                         'gooey',
