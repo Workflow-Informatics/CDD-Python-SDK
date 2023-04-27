@@ -68,8 +68,8 @@
 To install, run the following in a Git terminal:
 
 ```bash
-git clone https://github.com/Workflow-Informatics/CDD-Python-API.git
-cd CDD-Python-API/
+git clone https://github.com/Workflow-Informatics/CDD-Python-SDK.git
+cd CDD-Python-SDK/
 python setup.py install
 ```
 ***
