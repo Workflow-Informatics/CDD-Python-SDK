@@ -1,8 +1,9 @@
 # CDD-Python-SDK
 
-
 ### A Python client for streamlined execution of [CDD Vault API methods](https://support.collaborativedrug.com/hc/en-us/sections/115001607043-API-Function-Calls).
 
+#### This *unofficial* package was created with the express permission of Collaborative Drug Discovery Inc. 
+#### Please contact [Workflow Informatics Inc.](https://workflowinformatics.com) for communications regarding this package.
 
 - [Known Issues](#known-issues)
 - [Installation](#installation)
