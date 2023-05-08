@@ -129,7 +129,7 @@ setVaultNumAndURL(vaultNum)
 ```
 ### Set the vault ID and construct the base URL, from which endpoints for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
 * __Returns__: `tuple` a two-element tuple consisting of the vault ID and the base URL for accessing the CDD Vault API.
-
+---
 ```python
 setAPIKey(apiKey)
 ```
@@ -137,7 +137,7 @@ setAPIKey(apiKey)
 
 	Note that the API token must have read/write access to the vault specified by the vault ID when executing the various API calls or an error will be returned.
 * __Returns__: `str`
-
+---
 ```python
 setMaxSyncObjects(value=1000)
 ```
@@ -189,14 +189,14 @@ __Additional Valid Arguments__:
 "fields_search": "Array of Batch field names & values. Used to filter Batches returned based on query values"
 ```
 __Returns__: `pandas.DataFrame` or `list`
-
+---
 ```python
 postBatches(data=None, help=False)
 ```
 ### Create a new batch in CDD Vault.
 
 * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
-
+---
 ```python
 putBatches(self, id=None, data=None, help=False) 
 # id (int or str): unique id for an existing batch object in CDD Vault. Required, unless 'help' is set to True.
@@ -265,14 +265,14 @@ __Additional Valid Arguments__:
 "fields_search": "Array of Molecule field names & values. Used to filter Molecules returned based on query values"
 ```
 __Returns__: `pandas.DataFrame` or `list`
-
+---
 ```python
 postMolecules(data=None, help=False)
 ```
 ### Register a new molecule in CDD Vault.
 
 - __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#create)
-
+---
 ```python
 putMolecules(id=None, data=None, help=False)
 ```
@@ -300,7 +300,7 @@ __Returns__: `pandas.DataFrame` or `list`
 ## ELN Entries
 *Note: For security purposes, the GET and POST ELN Entries CDD Vault API commands documented here are only available for Vault Administrators.*
 
-
+---
 ```python
 getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=False, help=False, **kwargs)
 ```
@@ -316,7 +316,7 @@ getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=F
 	
 __Returns__: `pandas.DataFrame` or `list` 
 
-
+---
 ```python
 postELNEntries(project, title=None, eln_fields={})
 ```
@@ -357,7 +357,7 @@ getFile(fileID, destFolder=None)
 	
 __Returns__: `str` of decoded response, also writes to file system.
 
-
+---
 ```python
 postFiles(objectType, objectID, fileName)
 ```
@@ -369,7 +369,7 @@ postFiles(objectType, objectID, fileName)
 
 * __fileName `str`__ valid file path for upload to CDD.
 
-
+---
 ```python
 deleteFiles(fileID)
 ```
@@ -424,7 +424,7 @@ getPlates(asDataFrame=True, help=False, **kwargs)
 	
 __Returns__: JSON `dict` or `pandas.DataFrame`
 
-
+---
 ```python
 deletePlates(id)
 ```
@@ -573,7 +573,7 @@ putReadoutRows(id=None, data=None, help=False)
  
  * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
 
-
+---
 ```python
 deleteReadoutRows(id)
 ```
@@ -592,7 +592,7 @@ getRun(runID)
 
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
 
-
+---
 ```python
 putRuns(id=None, data=None, help=False)
 ```
@@ -608,7 +608,7 @@ putRuns(id=None, data=None, help=False)
 			as well as the Run_Date, Person, Place, and Conditions fields. 
 		
 		Required, unless 'help' is set to True. 
-
+---
 ```python
 deleteRuns(id, slurps=False)
 ```
