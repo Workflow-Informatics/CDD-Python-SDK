@@ -8,6 +8,11 @@ ___
 #### Please contact [Workflow Informatics Corp.](https://workflowinformatics.com) for communications regarding this package.
 ___
 
+- [CDD-Python-SDK](#cdd-python-sdk)
+		- [A Python client for streamlined execution of CDD Vault API methods.](#a-python-client-for-streamlined-execution-of-cdd-vault-api-methods)
+		- [NOTE:](#note)
+			- [This UNOFFICIAL package was created with the express permission of Collaborative Drug Discovery Inc., but is Licenced by Workflow Informatics Corp.](#this-unofficial-package-was-created-with-the-express-permission-of-collaborative-drug-discovery-inc-but-is-licenced-by-workflow-informatics-corp)
+			- [Please contact Workflow Informatics Corp. for communications regarding this package.](#please-contact-workflow-informatics-corp-for-communications-regarding-this-package)
 - [Known Issues](#known-issues)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
@@ -121,28 +126,30 @@ vault.getMolecules(help=True)
 
 # VaultClient Methods
 *Note: Additional methods are defined for VaultClient, but are not intended to be called by the end-user. However, developers are encouraged to check the docstrings within those methods.*
-
-## Control/Misc.
-
 ```python
 setVaultNumAndURL(vaultNum)
 ```
+
+
+## Control/Misc.
+
 ### Set the vault ID and construct the base URL, from which endpoints for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
 * __Returns__: `tuple` a two-element tuple consisting of the vault ID and the base URL for accessing the CDD Vault API.
+
 ---
+
+### Set the API token credentials, which will be passed in the request header to CDD Vault with each API request. 
 ```python
 setAPIKey(apiKey)
 ```
-### Set the API token credentials, which will be passed in the request header to CDD Vault with each API request. 
-
 	Note that the API token must have read/write access to the vault specified by the vault ID when executing the various API calls or an error will be returned.
 * __Returns__: `str`
+
 ---
+### Set the 'maxSyncObjects' attribute, which is used to determine when a synchronous vs asynchronous export request is submitted to CDD. If the # of objects returned from a GET request is ever `>=` maxSyncObjects, the call will be repeated asynchronously.
 ```python
 setMaxSyncObjects(value=1000)
 ```
-### Set the 'maxSyncObjects' attribute, which is used to determine when a synchronous vs asynchronous export request is submitted to CDD. If the # of objects returned from a GET request is ever `>=` maxSyncObjects, the call will be repeated asynchronously.
-
 	Defaults to 1000, the maximum # of objects which a CDD GET request can return synchronously.
 
 Only used in methods where GET requests can be performed asynchronously: 
@@ -152,11 +159,11 @@ Only used in methods where GET requests can be performed asynchronously:
 
 
 ## Batches
+
+### Return a set or subset of batches from CDD vault.
 ```python
 getBatches(asDataFrame=True, help=False, **kwargs)
 ```
-### Return a set or subset of batches from CDD vault.
-
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 
 __Additional Valid Arguments__:
@@ -189,35 +196,33 @@ __Additional Valid Arguments__:
 "fields_search": "Array of Batch field names & values. Used to filter Batches returned based on query values"
 ```
 __Returns__: `pandas.DataFrame` or `list`
+
 ---
+### Create a new batch in CDD Vault.
 ```python
 postBatches(data=None, help=False)
 ```
-### Create a new batch in CDD Vault.
-
 * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
+
 ---
+### Update an existing batch in CDD Vault.
 ```python
 putBatches(self, id=None, data=None, help=False) 
 # id (int or str): unique id for an existing batch object in CDD Vault. Required, unless 'help' is set to True.
 ```
-### Update an existing batch in CDD Vault.
-
 * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update)
 
 		Note: putBatches() method call should not be used to update the chemical structure of the parent Molecule. 
 		
 		Instead, use the putMolecules() method to achieve this.
-	
+
 
 ## Molecules
 
-
+### Return a list of molecules and their batches, based on optional parameters.
 ```python
 getMolecules(self, asDataFrame=True, help=False, **kwargs)
 ```
-### Return a list of molecules and their batches, based on optional parameters.
-
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 
 __Additional Valid Arguments__:
@@ -265,20 +270,19 @@ __Additional Valid Arguments__:
 "fields_search": "Array of Molecule field names & values. Used to filter Molecules returned based on query values"
 ```
 __Returns__: `pandas.DataFrame` or `list`
+
 ---
+### Register a new molecule in CDD Vault.
 ```python
 postMolecules(data=None, help=False)
 ```
-### Register a new molecule in CDD Vault.
-
 - __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#create)
+
 ---
+### Update an existing molecule in CDD Vault.
 ```python
 putMolecules(id=None, data=None, help=False)
 ```
-
-### Update an existing molecule in CDD Vault.
-
  * id `int` or `str` unique id for an existing molecule object in CDD Vault. Required, unless 'help' is set to True.
 
 * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update)
@@ -286,12 +290,10 @@ putMolecules(id=None, data=None, help=False)
 
 ## Public Data-Sets
 
-
+### Return a list of accessible public data sets for the given vault.
 ```python
 getDatasets(asDataFrame=True)
 ```
-### Return a list of accessible public data sets for the given vault.
-
 	Defaults to 1000, the maximum # of objects which a CDD GET request can return synchronously.
 	
 __Returns__: `pandas.DataFrame` or `list` 
@@ -301,11 +303,10 @@ __Returns__: `pandas.DataFrame` or `list`
 *Note: For security purposes, the GET and POST ELN Entries CDD Vault API commands documented here are only available for Vault Administrators.*
 
 ---
+### Return information on the ELN entries for the specified vault
 ```python
 getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=False, help=False, **kwargs)
 ```
-### Return information on the ELN entries for the specified vault
-
 * __summary `bool`__: if true, returns summary data for the requested ELN entries. This is equivalent to the synchronous call.
 
 * __asDataFrame `bool`__: returns the summary as a Pandas DataFrame. Only relevant if `summary=True`.
@@ -317,11 +318,10 @@ getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=F
 __Returns__: `pandas.DataFrame` or `list` 
 
 ---
+### Create a new ELN entry.
 ```python
 postELNEntries(project, title=None, eln_fields={})
 ```
-### Create a new ELN entry.
-
 * __project `str`__ the project ID or name where the new ELN entry will be created.
 
 * __title `str`__ the title of the new ELN entry.
@@ -331,12 +331,10 @@ postELNEntries(project, title=None, eln_fields={})
 
 ## Fields
 
-
+### Return a list of available fields for the given vault.
 ```python
 getFields(asDataFrame=True)
 ```
-### Return a list of available fields for the given vault.
-
 	This API call will provide you with the “type” and “name” values of *all* fields within a Vault. 
 	The json keys returned by this API call are organized into the following: internal, batch, molecule, protocol
 	
@@ -347,45 +345,38 @@ __Returns__: `dict` of `pandas.DataFrame` or `list`
 
 ## Files
 
-
+### Retrieve a single file object from CDD Vault using its file ID.
 ```python
 getFile(fileID, destFolder=None)
 ```
-### Retrieve a single file object from CDD Vault using its file ID.
-
  * __destFolder `str`__ destination folder where file contents should be written to. File name will default to the original name of the file when it was uploaded to CDD Vault.
 	
 __Returns__: `str` of decoded response, also writes to file system.
 
 ---
+### Attach a file to an object (Run, Molecule, Protocol or ELN entry).
 ```python
 postFiles(objectType, objectID, fileName)
 ```
-### Attach a file to an object (Run, Molecule, Protocol or ELN entry).
-
  * __objectType `str`__ specifies the CDD object type to which the file will be attached. Value must be one of *molecule*, *protocol*, *run*, or *eln_entry*.
 	
 * __objectID `str`__ an existing uid for a run, molecule, protocol, or ELN entry object.
 
 * __fileName `str`__ valid file path for upload to CDD.
-
 ---
+### Delete a single file attached to an object (Run, Molecule, Protocol or ELN entry) using its unique file ID.
 ```python
 deleteFiles(fileID)
 ```
-### Delete a single file attached to an object (Run, Molecule, Protocol or ELN entry) using its unique file ID.
-
 * __fileID `str`__ unique ID for an existing file in CDD vault.
 
 
 ## Mapping Templates
 
-
+### Return summary information on all available mapping templates in the Vault specified. Alternatively, if 'id' argument is set, will retrieve details on the data objects mapped within a specific mapping template.
 ```python
 getMappingTemplates(id=None, asDataFrame=True)
 ```
-### Return summary information on all available mapping templates in the Vault specified. Alternatively, if 'id' argument is set, will retrieve details on the data objects mapped within a specific mapping template.
-
 Additional fields when __id__ argument is set include:
 
 	A 'header_mappings' section that identifies the field/readout each header is mapped to.
@@ -399,12 +390,10 @@ __Returns__: JSON `dict` or `pandas.DataFrame`
 
 ## Plates
 
-
+### Return a collection of plates from CDD vault.
 ```python
 getPlates(asDataFrame=True, help=False, **kwargs)
 ```
-### Return a collection of plates from CDD vault.
-
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame. This parameter is ignored if an __id__ value has been set.
 
  __Additional Valid Arguments__:
@@ -421,26 +410,22 @@ getPlates(asDataFrame=True, help=False, **kwargs)
 
 "projects": "Comma-separated list of project ids.Defaults to all available projects.Limits scope of query."
 ```
-	
 __Returns__: JSON `dict` or `pandas.DataFrame`
 
 ---
+### Delete a single existing plate in CDD Vault using its plate ID.
 ```python
 deletePlates(id)
 ```
-### Delete a single existing plate in CDD Vault using its plate ID.
-
 * __id `str` or `int`__ Unique ID for an existing plate in CDD vault.
 
 
 ## Plot
 
-
+### Download dose-response curves/plots for a single Batch. 
 ```python
 getPlot(batchID, protocolID, size="small", destFolder=None)
 ```
-### Download dose-response curves/plots for a single Batch. 
-
 	This API call generates a png image file containing the dose-response plot for the specific Batch within the specified Protocol
 
  * __batchID `str`__ id for the desired batch.
@@ -456,12 +441,10 @@ __Returns__: `str` of decoded response, also writes to file system.
 
 ## Projects
 
-
+### Return a list of accessible projects for the given vault.
 ```python
 getProjects(asDataFrame=True)
 ```
-### Return a list of accessible projects for the given vault.
-
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 	
 __Returns__: JSON `dict` or `pandas.DataFrame`
@@ -469,12 +452,10 @@ __Returns__: JSON `dict` or `pandas.DataFrame`
 
 ## Protocols
 
-
+### Return a list of accessible projects for the given vault.
 ```python
 getProtocols(asDataFrame=True, help=False, **kwargs)
 ```
-### Return a list of accessible projects for the given vault.
-
  * __asDataFrame `bool`__ returns the json as a Pandas DataFrame.
 
  __Additional Valid Arguments__:
@@ -515,14 +496,12 @@ getProtocols(asDataFrame=True, help=False, **kwargs)
 __Returns__: JSON `dict` or `pandas.DataFrame`
 
 
-
 ## Protocol Data
 
+### Return a filtered subset of the readout data for a single protocol using its protocol ID. 
 ```python
 getProtocolData(id=None, asDataFrame=True, help=False, statusUpdates=True, **kwargs)
-```
-### Return a filtered subset of the readout data for a single protocol using its protocol ID. 
-	
+```	
 	'id' argument is required, unless 'help' is set to True.
 
  * __id `str` or `int`__ ID for the desired protocol.
@@ -558,11 +537,10 @@ __Returns__: JSON `dict` or `pandas.DataFrame`. Optionally writes .csv to file s
 
 ## Readout Rows
 
+### Update an existing readout row (including the ability to flag an existing readout row as an outlier).
 ```python
 putReadoutRows(id=None, data=None, help=False)
 ```
-### Update an existing readout row (including the ability to flag an existing readout row as an outlier).
-
 	Allows a user to update a specified row of Protocol data, set its value to null, or flag a specified row of Protocol data as an outlier.
 
 	Use getProtocolData() method with runs specified to ascertain the id of the readout row for the Protocol data you wish to edit.
@@ -572,32 +550,26 @@ putReadoutRows(id=None, data=None, help=False)
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault. Required, unless 'help' is set to True.
  
  * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
-
 ---
+### Delete a single readout row associated with protocol data in CDD Vault using its unique ID.
 ```python
 deleteReadoutRows(id)
 ```
-### Delete a single readout row associated with protocol data in CDD Vault using its unique ID.
-
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
-
 
 
 ## Runs
 
+### Retrieve a single run using its unique run ID.
 ```python
 getRun(runID)
 ```
-### Retrieve a single run using its unique run ID.
-
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
-
 ---
+### Update an existing run using its unique run ID.
 ```python
 putRuns(id=None, data=None, help=False)
 ```
-### Update an existing run using its unique run ID.
-
  * __id `str` or `int`__ unique id for an existing run object in CDD Vault.
 
   * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update)
@@ -609,11 +581,10 @@ putRuns(id=None, data=None, help=False)
 		
 		Required, unless 'help' is set to True. 
 ---
+### Delete one or more runs from CDD Vault
 ```python
 deleteRuns(id, slurps=False)
 ```
-### Delete one or more runs from CDD Vault
-
  * __slurps `bool`__ If True, the id parameter will be interpreted as a [slurps ID](https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files). Specifies the slurp_id of an import operation. The user must have [appropriate permissions](https://support.collaborativedrug.com/hc/en-us/articles/214359023-Vault-User-Roles) to remove ALL runs in the slurp.
 		
 		All runs associated with the slurps ID will be deleted. 
@@ -623,14 +594,12 @@ deleteRuns(id, slurps=False)
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault.
 
 
- ## Slurps
-
- ```python
-postSlurpsData(fileName, project, mappingTemplate=None, runs=None, interval=5.0)
-```
+## Slurps
 
 ### Bulk import endpoint for programmatic use. [CDD Support Topic](https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files)
-
+```python
+postSlurpsData(fileName, project, mappingTemplate=None, runs=None, interval=5.0)
+```
 	Uses an existing mapping template to map the data in the import file into CDD Vault.
 	
 	Once a file has been uploaded through the API, data from the import is committed immediately unless there are errors or warnings.
