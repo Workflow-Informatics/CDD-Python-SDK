@@ -126,18 +126,17 @@ vault.getMolecules(help=True)
 
 # VaultClient Methods
 *Note: Additional methods are defined for VaultClient, but are not intended to be called by the end-user. However, developers are encouraged to check the docstrings within those methods.*
-```python
-setVaultNumAndURL(vaultNum)
-```
 
 
 ## Control/Misc.
 
 ### Set the vault ID and construct the base URL, from which endpoints for all subsequent API calls (GET, POST, PUT, DELETE) will be constructed.
+```python
+setVaultNumAndURL(vaultNum)
+```
 * __Returns__: `tuple` a two-element tuple consisting of the vault ID and the base URL for accessing the CDD Vault API.
-
+* 
 ---
-
 ### Set the API token credentials, which will be passed in the request header to CDD Vault with each API request. 
 ```python
 setAPIKey(apiKey)
