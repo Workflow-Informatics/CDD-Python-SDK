@@ -210,7 +210,7 @@ putBatches(self, id=None, data=None)
 
 
 ```python
-getMolecules(self, asDataFrame=True, help=False, **kwargs)
+getMolecules(self, asDataFrame=True, **kwargs)
 ```
 ### Return a list of molecules and their batches, based on optional parameters.
 
@@ -267,15 +267,15 @@ postMolecules(data=None, help=False)
 ```
 ### Register a new molecule in CDD Vault.
 
-- __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#create)
+- __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#create)
 
 ```python
-putMolecules(id=None, data=None, help=False)
+putMolecules(id=None, data=None)
 ```
 
 ### Update an existing molecule in CDD Vault.
 
- * id `int` or `str` unique id for an existing molecule object in CDD Vault. Required, unless 'help' is set to True.
+ * id `int` or `str` unique id for an existing molecule object in CDD Vault. Required.
 
 * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update)
 
@@ -298,7 +298,7 @@ __Returns__: `pandas.DataFrame` or `list`
 
 
 ```python
-getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=False, help=False, **kwargs)
+getELNEntries(summary=True, asDataFrame=True, exportPath=None, unzipELNEntries=False, **kwargs)
 ```
 ### Return information on the ELN entries for the specified vault
 
@@ -397,7 +397,7 @@ __Returns__: JSON `dict` or `pandas.DataFrame`
 
 
 ```python
-getPlates(asDataFrame=True, help=False, **kwargs)
+getPlates(asDataFrame=True, **kwargs)
 ```
 ### Return a collection of plates from CDD vault.
 
@@ -467,7 +467,7 @@ __Returns__: JSON `dict` or `pandas.DataFrame`
 
 
 ```python
-getProtocols(asDataFrame=True, help=False, **kwargs)
+getProtocols(asDataFrame=True, **kwargs)
 ```
 ### Return a list of accessible projects for the given vault.
 
@@ -515,7 +515,7 @@ __Returns__: JSON `dict` or `pandas.DataFrame`
 ## Protocol Data
 
 ```python
-getProtocolData(id=None, asDataFrame=True, help=False, statusUpdates=True, **kwargs)
+getProtocolData(id=None, asDataFrame=True, statusUpdates=True, **kwargs)
 ```
 ### Return a filtered subset of the readout data for a single protocol using its protocol ID. 
 	
@@ -555,7 +555,7 @@ __Returns__: JSON `dict` or `pandas.DataFrame`. Optionally writes .csv to file s
 ## Readout Rows
 
 ```python
-putReadoutRows(id=None, data=None, help=False)
+putReadoutRows(id=None, data=None)
 ```
 ### Update an existing readout row (including the ability to flag an existing readout row as an outlier).
 
@@ -567,7 +567,7 @@ putReadoutRows(id=None, data=None, help=False)
 
  * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault. Required, unless 'help' is set to True.
  
- * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
+ * __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
 
 
 ```python
@@ -590,7 +590,7 @@ getRun(runID)
 
 
 ```python
-putRuns(id=None, data=None, help=False)
+putRuns(id=None, data=None)
 ```
 ### Update an existing run using its unique run ID.
 
