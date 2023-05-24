@@ -263,7 +263,7 @@ __Additional Valid Arguments__:
 __Returns__: `pandas.DataFrame` or `list`
 
 ```python
-postMolecules(data=None, help=False)
+postMolecules(data=None)
 ```
 ### Register a new molecule in CDD Vault.
 
@@ -277,7 +277,7 @@ putMolecules(id=None, data=None)
 
  * id `int` or `str` unique id for an existing molecule object in CDD Vault. Required.
 
-* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update)
+* __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON](https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update)
 
 
 ## Public Data-Sets
@@ -519,7 +519,7 @@ getProtocolData(id=None, asDataFrame=True, statusUpdates=True, **kwargs)
 ```
 ### Return a filtered subset of the readout data for a single protocol using its protocol ID. 
 	
-	'id' argument is required, unless 'help' is set to True.
+	'id' argument is required.
 
  * __id `str` or `int`__ ID for the desired protocol.
 
@@ -565,7 +565,7 @@ putReadoutRows(id=None, data=None)
 	
 	Use getProtocols() method to ascertain the readout definition IDs.
 
- * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault. Required, unless 'help' is set to True.
+ * __id `str` or `int`__ unique id for an existing readout row object in CDD Vault. Required.
  
  * __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-#update)
 
@@ -596,14 +596,14 @@ putRuns(id=None, data=None)
 
  * __id `str` or `int`__ unique id for an existing run object in CDD Vault.
 
-  * __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update)
+  * __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update)
 
 		Fields not specified in the JSON are not changed. 
 		
 		Allows users to update the run's Project association,
 			as well as the Run_Date, Person, Place, and Conditions fields. 
 		
-		Required, unless 'help' is set to True. 
+		Required. 
 
 ```python
 deleteRuns(id, slurps=False)
