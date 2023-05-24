@@ -1,0 +1,26 @@
+
+class: Optional. If present, must be 'molecule'.
+
+name: String name (required).
+
+smiles: Only one of these ['smiles', 'csxmiles', 'molfile', 'structure'] may be present.
+
+	'structure' accepts SMILES strings or Molfiles as values.
+	
+	For molfiles, replace all new lines with '\\n' (JSON requirement).
+
+cxsmiles: See smiles entry.
+
+molfile: See smiles entry.
+
+structure: See smiles entry.
+
+description: String.
+
+synonyms: An array of strings.
+
+udfs: {<udf_name>: <udf_value>, ... }
+
+projects: An array of project ids and/or names (Required).
+
+collections: An array of project ids and/or names.

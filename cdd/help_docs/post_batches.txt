@@ -1,0 +1,27 @@
+
+class: Optional. If present, must be 'batch'.
+
+molecule: See create a molecule when creating new molecules in a vault at:
+	  https://support.collaborativedrug.com/hc/en-us/articles/115005685466#create
+
+name: String name (required).
+
+projects: An array of project ids and/or names (required).
+
+batch_fields: Each vault has its own settings on the minimum information required to create a new Batch. 
+	      For a Vault Administrator, see Settings > Vault > Batch Fields, to change which Batch fields are required.
+
+			   {<batch_field_name>: <batch_field_value>, ... }
+
+salt_name: A two-letter code or Salt vendor string as listed here: 
+	   https://app.collaborativedrug.com/support/salts.
+
+	   The salt is determined automatically when the salt is included in the molecular structure.
+
+solvent_of_crystallization_name: Name of the solvent.
+
+stoichiometry: {
+		"core_count": <integer>,
+		"salt_count": <integer>,
+		"solvent_of_crystallization_count": <integer>
+		}

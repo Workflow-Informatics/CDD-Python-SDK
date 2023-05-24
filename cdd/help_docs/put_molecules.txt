@@ -1,0 +1,9 @@
+
+name: If this field is supplied, the old name is automatically added as a synonym.
+      To delete a molecule name, you must exclude it from the list of synonyms.
+      Names cannot be changed in registration vaults.
+
+synonyms: If supplied, the list of synonyms replaces the existing list.
+
+udfs: Only fields explicitly mentioned will be changed.
+      A user-defined field can be removed by using the value null (no quotes).
