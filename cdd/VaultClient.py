@@ -40,6 +40,33 @@ helpDir = os.path.join(
 				"help_docs")
 
 
+def appendToDocString(*args, **kwargs):
+	"""
+	:Description: decorates each class method's doc string with
+				  descriptions of valid keyword arguments which
+				  will in turn be passed to CDD Vault.
+
+				  Mainly used with class methods which implement
+				  HTTP verbs (GET, POST, etc.) described in the
+				  CDD Vault API.
+	"""
+
+	helpDoc = kwargs.get("helpDoc")
+	helpDoc = os.path.join(helpDir, helpDoc)
+	helpDoc = "\t\t".join(open(helpDoc).readlines())
+
+	if not helpDoc.endswith("\n"): helpDoc += "\n"
+
+	def inner(func):
+
+		func.__doc__ += "\n\n\t\t:Valid CDD Keyword Arguments:\n"
+		func.__doc__ += helpDoc
+
+		return func
+
+	return inner
+
+
 class VaultClient(object):
 
 	def __init__(self, vaultNum, apiKey):
@@ -144,35 +171,12 @@ class VaultClient(object):
 		return self.maxSyncObjects
 
 
-	def formatHelp(self, valid_kwargs):
-		"""
-		:Description: displays a help string describing the usage
-					  for a particular set of query parameters, for
-					  quick reference from Python.
-
-					  This will soon be depracated.
-		"""
-
-		helpString = ""
-
-		for prm in valid_kwargs: 
-			
-			helpString += f"\n\n\n{prm}:\n\n{valid_kwargs[prm]}"
-
-		print(helpString)
-		return None
-
-
-	def getValidKwargs(self, fileName, displayHelp=False):
+	def getValidKwargs(self, fileName):
 		"""
 		:Description: retrieves a list of valid keyword arguments for a 
 					  specific CDD Vault API method from the method's 
 					  help documentation.
 					  
-					  Alternatively, prints the entire contents of the help document, 
-					  if displayHelp=True.
-
-
 		Valid keywords in help documentation files are identified by:
 
 			1) No white space characters at the start of the line.
@@ -184,22 +188,12 @@ class VaultClient(object):
 		:fileName (str): the name of a valid file containing help documentation for
 						 a CDD Vault API method.
 
-		:displayHelp (bool): prints the help documentation for the specified
-							 file to the terminal, if true.
-
 		: return (list of str):
 		"""
 
 		filePath = os.path.join(helpDir, fileName)
 
 		doc = open(filePath).readlines()
-
-		if displayHelp:
-
-			doc = "".join(doc)
-			print(doc)
-			
-			return
 
 		# Parse help file + locate valid keyword arguments:
 
@@ -366,7 +360,8 @@ class VaultClient(object):
 		return response
 
 
-	def getBatches(self, asDataFrame=True, displayHelp=False, **kwargs):
+	@appendToDocString(helpDoc="get_batches.txt")
+	def getBatches(self, asDataFrame=True, **kwargs):
 		"""
 		:Description: return a collection of batches from CDD vault. 
 		
@@ -376,9 +371,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_batches.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Get batches + format output:
@@ -410,8 +403,9 @@ class VaultClient(object):
 		return datasets
 
 
+	@appendToDocString(helpDoc="get_ELN_entries.txt")
 	def getELNEntries(self, summary=True, asDataFrame=True, 
-					  exportPath=None, unzipELNEntries=False, displayHelp=False, **kwargs):
+					  exportPath=None, unzipELNEntries=False, **kwargs):
 		"""
 		:Description: returns information on the ELN entries for the specified vault.
 
@@ -429,9 +423,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_ELN_entries.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Retrieve summary ELN data:
@@ -557,7 +549,8 @@ class VaultClient(object):
 		return response
 
 
-	def getMolecules(self, asDataFrame=True, help=False, displayHelp=False, **kwargs):
+	@appendToDocString(helpDoc="get_molecules.txt")
+	def getMolecules(self, asDataFrame=True, **kwargs):
 		"""
 		:Description: return a list of molecules and their batches, based on optional parameters.
 		
@@ -567,9 +560,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_molecules.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Send request to CDD API:
@@ -583,7 +574,8 @@ class VaultClient(object):
 		return molecules
 
 
-	def getPlates(self, asDataFrame=True, displayHelp=False, **kwargs):
+	@appendToDocString(helpDoc="get_plates.txt")
+	def getPlates(self, asDataFrame=True, **kwargs):
 		"""
 		:Description: return a collection of plates from CDD vault. 
 		
@@ -593,9 +585,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_plates.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Get plates + format output:
@@ -624,7 +614,8 @@ class VaultClient(object):
 		print(response)
 
 
-	def getProtocols(self, asDataFrame=True, displayHelp=False, **kwargs):
+	@appendToDocString(helpDoc="get_protocols.txt")
+	def getProtocols(self, asDataFrame=True, **kwargs):
 		"""
 		:Description: returns a list of protocols based on criteria as specified by parameters:
 		
@@ -634,9 +625,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_protocols.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Send request to CDD API:
@@ -650,7 +639,8 @@ class VaultClient(object):
 		return protocols
 
 
-	def getProtocolData(self, id=None, asDataFrame=True, displayHelp=False, statusUpdates=True, **kwargs):
+	@appendToDocString(helpDoc="get_protocol_data.txt")
+	def getProtocolData(self, id=None, asDataFrame=True, statusUpdates=True, **kwargs):
 		"""
 		:Description: returns (a subset of) the readout data for a single protocol using its protocol ID.
 					  'id' argument is required, unless 'help' is set to True.
@@ -661,9 +651,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_protocol_data.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Get protocol data + format output:
@@ -706,7 +694,8 @@ class VaultClient(object):
 		return projects
 
 
-	def getReadoutRows(self, asDataFrame=True, displayHelp=False, **kwargs):
+	@appendToDocString(helpDoc="get_readout_rows.txt")
+	def getReadoutRows(self, asDataFrame=True, **kwargs):
 		"""
 		:Description: returns (a subset of) the readout data for any number of protocols.
 
@@ -716,9 +705,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_readout_rows.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Send request to CDD API:
@@ -746,8 +733,9 @@ class VaultClient(object):
 		return run
 
 
+	@appendToDocString(helpDoc="get_saved_searches.txt")
 	def getSavedSearches(self, searchID=None, format="csv", zip=False, filePath=None, 
-										asDataFrame=True, displayHelp=False, **kwargs):
+										asDataFrame=True, **kwargs):
 		"""
 		:Description: returns either a list of available saved searches if 'searchID' is not specified
 					  or executes a saved search using the specified 'searchID'.
@@ -771,8 +759,6 @@ class VaultClient(object):
 
 		:asDataFrame (bool): whether to return the search results as a Pandas DataFrame.
 							 This is only used if 'searchID=None' which is the default.
-
-		:displayHelp (bool): displays available keyword arguments for the API call + exits.
 
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005699026-Saved-Search-es-GET-
 		"""
@@ -829,9 +815,7 @@ class VaultClient(object):
 		# Retrieve valid keyword arguments from help documentation:
 
 		helpDoc = "get_saved_searches.txt"
-		valid_kwargs = self.getValidKwargs(helpDoc, displayHelp=displayHelp)
-
-		if displayHelp: return
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
 		# Retrieve list of available saved searches, if no search ID is provided:
@@ -887,7 +871,8 @@ class VaultClient(object):
 		return response.json()
 
 
-	def postBatches(self, data=None, help=False):
+	@appendToDocString(helpDoc="post_batches.txt")
+	def postBatches(self, data=None):
 		"""
 		:Description: creates a new batch in CDD Vault.
 
@@ -898,35 +883,6 @@ class VaultClient(object):
 		"""
 
 		# Construct URL:
-
-		allowedJsonKeys = {"class": "Optional. If present, must be 'batch'.",
-
-						   "molecule": "See create a molecule when creating new molecules in a vault at:\n\n"
-									   "https://support.collaborativedrug.com/hc/en-us/articles/115005685466#create",
-
-						   "name": "String (required).",
-
-						   "projects": "An array of project ids and/or names (Required).",
-
-						   "batch_fields": "Each vault has its own settings on the minimum information required to create a new Batch.\n" 
-										   "For a Vault Administrator, see Settings > Vault > Batch Fields, to change which Batch fields are required.\n\n"
-
-										   "{<batch_field_name>: <batch_field_value>, ... }",
-
-						   "salt_name": "A two-letter code or Salt vendor string as listed here: https://app.collaborativedrug.com/support/salts.\n"  
-										"The salt is determined automatically when the salt is included in the molecular structure.",
-
-						   "solvent_of_crystallization_name": "Name of the solvent.",
-
-						   "stoichiometry": "{\n"
-											"\t\"core_count\": <integer>,\n"
-											"\t\"salt_count\": <integer>,\n"
-											"\t\"solvent_of_crystallization_count\": <integer>\n"
-											"}" }
-
-
-
-		if help: return self.formatHelp(allowedJsonKeys)
 	
 		suffix = "/batches"
 		URL = self.URL + suffix
@@ -1011,7 +967,8 @@ class VaultClient(object):
 		return response.json()
 	
 
-	def postMolecules(self, data=None, help=False):
+	@appendToDocString(helpDoc="post_molecules.txt")
+	def postMolecules(self, data=None):
 		"""
 		:Description: registers a new molecule in CDD Vault.
 
@@ -1023,33 +980,6 @@ class VaultClient(object):
 
 		# Construct URL:
 
-		allowedJsonKeys = {"class": "Optional. If present, must be 'molecule'.",
-
-						"name": "String (required).",
-
-						"smiles": "Only one of these [smiles, csxmiles, molfile, structure] may be present.\n" 
-						"'structure' accepts SMILES strings or Molfiles as values.\n" 
-						"For molfiles, replace all new lines with \\n (JSON requirement)",
-
-						"cxsmiles": "See smiles entry.",
-
-						"molfile": "See smiles entry.",
-
-						"structure": "See smiles entry.",
-
-						"description": "String.",
-
-						"synonyms": "An array of strings.",
-
-						"udfs": "{<udf_name>: <udf_value>, ... }",
-
-						"projects": "An array of project ids and/or names (Required).",
-
-						"collections": "An array of project ids and/or names." }
-
-
-		if help: return self.formatHelp(allowedJsonKeys)
-	
 		suffix = "/molecules"
 		URL = self.URL + suffix
 		
@@ -1176,7 +1106,8 @@ class VaultClient(object):
 		return response.json()
 
 
-	def putBatches(self, id=None, data=None, help=False):
+	@appendToDocString(helpDoc="post_batches.txt") # Calls help from postBatches() method, since inputs are the same.
+	def putBatches(self, id=None, data=None):
 		"""
 		:Description: updates an existing batch. 
 
@@ -1194,8 +1125,6 @@ class VaultClient(object):
 		"""
 
 		# Construct URL:
-
-		if help: return self.postBatches(help=True) # help=True calls help from postBatches() method, since inputs are the same.
 	
 		suffix = f"/batches/{id}"
 		URL = self.URL + suffix
@@ -1208,7 +1137,8 @@ class VaultClient(object):
 		return response   
 
 
-	def putMolecules(self, id=None, data=None, help=False):
+	@appendToDocString(helpDoc="put_molecules.txt")
+	def putMolecules(self, id=None, data=None):
 		"""
 		:Description: updates an existing molecule. Some keys behave differently when used with
 					  putMolecules() vs. postMolecules(). Run with help=True for more details.
@@ -1224,20 +1154,6 @@ class VaultClient(object):
 		"""
 
 		# Construct URL:
-
-		allowedJsonKeys = {
-						"name": "If this field is supplied, the old name is automatically added as a synonym.\n" 
-								"To delete a molecule name, you must exclude it from the list of synonyms.\n"
-								"Names cannot be changed in registration vaults.",
-
-						"synonyms": "If supplied, the list of synonyms replaces the existing list.",
-
-						"udfs": "Only fields explicitly mentioned will be changed.\n" 
-								"A user-defined field can be removed by using the value null (no quotes)."
-						}
-
-
-		if help: return self.formatHelp(allowedJsonKeys)
 	
 		suffix = f"/molecules/{id}"
 		URL = self.URL + suffix
@@ -1250,7 +1166,7 @@ class VaultClient(object):
 		return response   
 
 
-	def putRuns(self, id=None, data=None, help=False):
+	def putRuns(self, id=None, data=None):
 		"""
 		:Description: updates an existing run. 
 
@@ -1266,11 +1182,6 @@ class VaultClient(object):
 		"""
 
 		# Construct URL:
-
-		if help: 
-			
-			print("No additional help defined.")
-			return 
 	
 		suffix = f"/runs/{id}"
 		URL = self.URL + suffix
@@ -1283,7 +1194,7 @@ class VaultClient(object):
 		return response   
  
 
-	def putReadoutRows(self, id=None, data=None, help=False):
+	def putReadoutRows(self, id=None, data=None):
 		"""
 		:Description: updates an existing readout row (including the ability to flag an existing readout row as an outlier).
 
@@ -1311,11 +1222,6 @@ class VaultClient(object):
 		"""
 
 		# Construct URL:
-
-		if help: 
-			
-			print("No additional help defined.")
-			return 
 	
 		suffix = f"/readout_rows/{id}"
 		URL = self.URL + suffix
