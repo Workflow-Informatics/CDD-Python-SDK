@@ -97,9 +97,9 @@ protocols_json = vault.getProtocols(asDataFrame=False)
 filtered_protocols = vault.getProtocols(projects = projects_dataframe.at[0, 'id'])
 ```
 
-4. A full list of valid parameters can be returned by passing  `help=True`
+4. A full list of valid CDD API query parameters can be displayed in each method's doc string.
 ```python
-vault.getMolecules(help=True)
+vault.getMolecules?
 ```
 ***
 
@@ -149,7 +149,7 @@ Only used in methods where GET requests can be performed asynchronously:
 
 ## Batches
 ```python
-getBatches(asDataFrame=True, help=False, **kwargs)
+getBatches(asDataFrame=True, **kwargs)
 ```
 ### Return a set or subset of batches from CDD vault.
 
@@ -187,19 +187,19 @@ __Additional Valid Arguments__:
 __Returns__: `pandas.DataFrame` or `list`
 
 ```python
-postBatches(data=None, help=False)
+postBatches(data=None)
 ```
 ### Create a new batch in CDD Vault.
 
-* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
+* __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#create)
 
 ```python
-putBatches(self, id=None, data=None, help=False) 
-# id (int or str): unique id for an existing batch object in CDD Vault. Required, unless 'help' is set to True.
+putBatches(self, id=None, data=None) 
+# id (int or str): unique id for an existing batch object in CDD Vault.
 ```
 ### Update an existing batch in CDD Vault.
 
-* __data__: Required, unless 'help' is set to True. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update)
+* __data__: Required. Must be either a valid json object, or a string file path to a valid json file. [Allowed JSON Examples](https://support.collaborativedrug.com/hc/en-us/articles/115005682943-Batch-es-GET-POST-PUT-#update)
 
 		Note: putBatches() method call should not be used to update the chemical structure of the parent Molecule. 
 		
