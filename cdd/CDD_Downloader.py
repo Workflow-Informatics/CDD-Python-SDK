@@ -96,7 +96,7 @@ class CDD_Downloader(VaultClient):
         return (self.runs_before, self.runs_after)
 
 
-    def downloadCDDRuns(self, singleThread=False):
+    def downloadCDDRuns(self, numThreads=1):
 
 
         def locateCDDRuns():
@@ -239,33 +239,38 @@ class CDD_Downloader(VaultClient):
             return
 
                 
-        def extractCDDRuns(runs, singleThread=False):
+        def extractCDDRuns(runs, numThreads=1):
 
             # Initiates a local extraction of runs from CDD Vault using multi-threading.
 
-            # If singleThread = True or the # of runs is less than 3, defaults to
-            # a single-threaded extraction.
+            # numThreads indicates the # of threads to execute concurrently and must be
+            # an integer value between 1-3.
 
-            # If executing a multi-threaded extraction, the # of threads will always be 3,
-            # which is the maximum # of concurrent requests allowed by CDD Vault.
+            # Note that the max limit of 3 is a limit due to the # of concurrent API requests
+            # allowed by CDD.
+
+            assert isinstance(numThreads, int) and numThreads >= 1 and numThreads <= 3, \
+                "'numThreads' must be an integer value between 1-3."
+
 
             numRuns = runs.shape[0]
 
-            if singleThread or numRuns < 3:
+            interval = numRuns // numThreads
 
-                extractCDDRunsSingleThread(runs)
+            allThreads = []
+            for i in range(numThreads):
 
-            else:
-                interval = numRuns // 3
+                start = i*interval
+                finish = interval + i*interval
 
-                t1 = threading.Thread(target=extractCDDRunsSingleThread, args=(runs.iloc[:interval],))
-                t2 = threading.Thread(target=extractCDDRunsSingleThread, args=(runs.iloc[interval:interval*2],))
-                t3 = threading.Thread(target=extractCDDRunsSingleThread, args=(runs.iloc[interval*2:],))
+                t = threading.Thread(target=extractCDDRunsSingleThread, args=(runs.iloc[start:finish],))
+                if i == (numThreads - 1):
+                    t = threading.Thread(target=extractCDDRunsSingleThread, args=(runs.iloc[start:],))
 
-                allThreads = [t1, t2, t3]
+                allThreads.append(t)
 
-                for t in allThreads: t.start()
-                for t in allThreads: t.join()
+            for t in allThreads: t.start()
+            for t in allThreads: t.join()
 
             return runs
 
@@ -296,7 +301,7 @@ class CDD_Downloader(VaultClient):
         runs = locateCDDRuns()
         runs = filterCDDRuns(runs)
         runs = buildTargetPaths(runs)
-        runs = extractCDDRuns(runs, singleThread=singleThread)
+        runs = extractCDDRuns(runs, numThreads=numThreads)
         runs = removeExtraRunDirs(runs)
 
 
