@@ -70,7 +70,7 @@ class Vault(VaultClient):
 											 be removed from the returned DataFrame. 
 											 
 											 Alternatively, a list of string column names can be passed 
-											 modifying which columns will be dropped from the returned DataFrame.
+											 specifying which columns will be dropped from the returned DataFrame.
 
 
 		:omitOutlierField (bool): if true, each readout column will only include the 'value'
