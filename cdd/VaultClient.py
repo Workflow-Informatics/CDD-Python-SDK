@@ -360,6 +360,24 @@ class VaultClient(object):
 		return response
 
 
+	def getBatchMoveJobs(self, batchMoveJobID=None):
+		"""
+		:Description: retrieve the statuses of one or more batch move jobs from CDD Vault queue.
+
+		:batchMoveJobID (int or str): the unique ID of the batch move job to retrieve.
+		"""
+
+		suffix = "/batch_move_jobs"
+		if batchMoveJobID: 
+			suffix += f"/{batchMoveJobID}"
+
+		URL = self.URL + suffix
+
+		batchMoveJobs = self.sendGetRequest(URL=URL)
+
+		return batchMoveJobs
+
+
 	@appendToDocString(helpDoc="get_batches.txt")
 	def getBatches(self, asDataFrame=True, **kwargs):
 		"""
@@ -871,6 +889,25 @@ class VaultClient(object):
 		return response.json()
 
 
+	@appendToDocString(helpDoc="post_batch_move_job.txt")
+	def postBatchMoveJob(self, data=None):
+		"""
+		:Description: creates a new batch move job to move a batch to a different molecule in the same vault.
+		"""
+
+		# Construct URL:
+
+		suffix = "/batch_move_jobs"
+		URL = self.URL + suffix
+
+
+		# Post batch move job to CDD Vault + get response:
+
+		response = self.sendPostRequest(URL, data)
+
+		return response
+
+
 	@appendToDocString(helpDoc="post_batches.txt")
 	def postBatches(self, data=None):
 		"""
@@ -1264,6 +1301,25 @@ class VaultClient(object):
 		
 		response = self.sendDeleteRequest(URL)
 		
+		return response
+
+
+	def deleteBatchMoveJob(self, batchMoveJobID):
+		"""
+		:Description: cancels a single batch move job. Cannot be used to cancel a job already in progress.
+
+		:batchMoveJobID (int or str): the unique ID of the batch move job to delete.
+		"""
+
+		# Construct URL: 
+
+		suffix = f"/batch_move_jobs/{batchMoveJobID}"
+		URL = self.URL + suffix
+
+		# Delete batch move job present in CDD Vault + get response:
+
+		response = self.sendDeleteRequest(URL)
+
 		return response
 
 
