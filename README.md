@@ -63,7 +63,10 @@ ___
 		- [Delete one or more runs from CDD Vault](#delete-one-or-more-runs-from-cdd-vault)
 	- [Slurps](#slurps)
 		- [Bulk import endpoint for programmatic use. CDD Support Topic](#bulk-import-endpoint-for-programmatic-use-cdd-support-topic)
-
+	- [Batch Move Job(s)](#batch-move-jobs)
+   		- [Retrieve the statuses of one or more batch move jobs from CDD Vault queue.](#retrieve-the-statuses-of-one-or-more-batch-move-jobs-from-cdd-vault-queue)
+       		- [Create a new batch move job to move a batch to a different molecule in the same vault.](#create-a-new-batch-move-job-to-move-a-batch-to-a-different-molecule-in-the-same-vault)
+       		- [Cancel a single batch move job in the queue](#cancel-a-single-batch-move-job-in-the-queue)
 
 # Known Issues
 
@@ -622,3 +625,37 @@ postSlurpsData(fileName, project, mappingTemplate=None, runs=None, interval=5.0)
 "person": default value is user's full name.
 "conditions": no default value provided.
 ```
+
+## Batch Move Jobs
+
+### This endpoint requires the user to be a vault admin
+
+### Retrieve the statuses of one or more batch move jobs from CDD Vault queue.
+```python
+getBatchMoveJobs(self, batchMoveJobID=None)
+```	
+
+ * _batchMoveJobID `int` or `str`_ Optional. The unique ID of the batch move job to retrieve. If `None`, retrieves all jobs in the queue.
+
+### Create a new batch move job to move a batch to a different molecule in the same vault.
+```python
+postBatchMoveJob(self, data=None)
+```
+
+ * _data `JSON`_ Required. Valid Keys:
+```json
+"batch": Unique integer ID of the batch to move. Required.
+"molecule": Unique integer ID of the molecule to move the batch to. Required.
+"name": A new name for the batch. Optional. Only allowed
+      for vaults without a registration system.
+"fail_on_molecule_deletion": Fail if moving the batch would trigger the removal
+			   of the originating molecule. Default true.
+```
+
+### Cancel a single batch move job in the queue
+```python
+deleteBatchMoveJob(self, batchMoveJobID)
+```
+ * _batchMoveJobID `int` or `str`_ Required. The unique ID of the batch move job to retrieve.
+
+#### NOTE: Once a job has started it cannot be deleted. Also, if you are moving the highest batch of a molecule, the batch number it previously occupied will be reused by the next batch of the original molecule.
