@@ -77,12 +77,10 @@ ___
 * * *
 # Installation
 
-To install, run the following in a Git terminal:
+The latest version of the CDD Python SDK is located [here](https://pypi.org/project/cdd-python-sdk/) and can be installed using pip:
 
 ```bash
-git clone https://github.com/Workflow-Informatics/CDD-Python-SDK.git
-cd CDD-Python-SDK/
-python setup.py install
+pip install cdd-python-sdk
 ```
 ***
 # Getting Started
