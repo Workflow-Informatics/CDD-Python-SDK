@@ -1,2 +1,1 @@
-graft cdd/help_docs/
-graft cdd/image_dir/
+graft src/cdd_python_sdk/help_docs/

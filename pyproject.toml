@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0", "pandas", "requests"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "cdd_python_sdk"
+version = "1.0.1"
+authors = [
+  { name="Gerard Mattei", email="gerry.mattei@workflowinformatics.com" },
+  { name="Ryan Moore", email="ryan.moore@workflowinformatics.com" }
+]
+description = "A Python client for streamlined execution of CDD Vault API methods."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Operating System :: OS Independent",
+]
+
