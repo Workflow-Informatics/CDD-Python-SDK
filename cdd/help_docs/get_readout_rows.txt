@@ -1,0 +1,65 @@
+
+async:
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+only_ids:
+		Boolean. If true, only the Readout Row IDs are returned, allowing for a smaller 
+		and faster response. Default: False.
+
+protocols: 
+		Comma-separated list of protocol ID's. 
+		Include data for the specified protocols.
+		Optional parameter.
+		
+projects: 
+		Comma-separated list of project ID's. Defaults to all available projects.
+		Limits scope of query.
+
+plates: 
+		Comma-separated list of plate ID's.
+		Include only data for the specified plates.
+
+molecules: 
+		Comma-separated list of molecule ID's.
+		Include only data for the specified molecules.
+		
+created_before: 
+		Date (YYYY-MM-DD). Include only readout rows created on or before the date.
+
+created_after: 
+		Date (YYYY-MM-DD). Include only readout rows created on or after the date.
+
+modified_before:
+		Date (YYYY-MM-DD). Include only readout rows modified on or before the date.
+
+modified_after:
+		Date (YYYY-MM-DD). Include only readout rows modified on or after the date.
+		
+runs_before: 
+		Date (YYYY-MM-DD). Include only data for runs created on or before the date.
+		
+runs_after: 
+		Date (YYYY-MM-DD). Include only data for runs created on or after the date.
+
+runs: 
+		Comma-separated list of run ID's for the given protocol.
+		Include only data for runs listed.
+
+page_size:
+		The maximum number of objects to return in this call. Default is 50, maximum is 1000.
+
+type: 
+		Defaults to all. Can supply any number of readout row types the endpoint should return.
+		Any aggregate rows will also include their protocol conditions in their readouts.
+		
+		Valid values are:
+		
+			'detail_row'
+			'batch_run_aggregate_row'
+			'batch_protocol_aggregate_row'
+			'molecule_protocol_aggregate_row'
+
+data_sets: 
+		Comma-separated list of public dataset ID's.
+		Defaults to no data sets. Limits scope of query.

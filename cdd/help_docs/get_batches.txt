@@ -1,0 +1,61 @@
+
+batches: 
+		Comma-separated list of ids.
+		Cannot be used with other parameters.
+
+async: 
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+no_structures: 
+		Boolean. If true, omit structure representations
+		for a smaller and faster response. Default: false.
+
+only_ids: 
+		Boolean. If true, only the Batch IDs are returned,
+		allowing for a smaller and faster response. Default: false.
+
+created_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+created_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+molecule_created_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+molecule_created_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+page_size: 
+		The maximum # of objects to return.
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.
+
+data_sets: 
+		Comma-separated list of public data set ids.
+		Defaults to no data sets. Limits scope of query.
+
+molecule_batch_identifier: 
+		A Molecule-Batch ID used to query the Vault.
+		Use this parameter to limit the number of Molecule UDF Fields to return.
+
+molecule_fields: 
+		Array of Molecule field names to include in the resulting JSON.
+		Use this parameter to limit the number of Molecule UDF Fields to return.
+
+batch_fields: 
+		Array of Batch field names to include in the resulting JSON.
+		Use this parameter to limit the number of Batch UDF Fields to return.
+
+fields_search: 
+		Array of Batch field names & values. Used to filter Batches returned based on query values.

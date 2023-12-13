@@ -1,0 +1,44 @@
+
+eln_entries: 
+		Comma-separated list of ELN entry IDs.
+
+author: 
+		Comma separated list of ELN author ID's.
+		Note: Must be users' ID's, users' names cannot be used.
+
+status:
+		Returns ELN entries that have the status specified.
+		Valid status values are: 'open', 'submitted', or 'finalized'.
+
+only_ids: 
+		Boolean. If true, only the ELN entry ID's are returned,
+		allowing for a smaller and faster response. Default: false.
+
+created_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+created_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+submitted_date_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+submitted_date_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+finalized_date_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+finalized_date_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.

@@ -1,0 +1,10 @@
+
+batch: Unique integer ID of the batch to move. Required.
+
+molecule: Unique integer ID of the molecule to move the batch to. Required.
+
+name: A new name for the batch. Optional. Only allowed
+      for vaults without a registration system.
+
+fail_on_molecule_deletion: Fail if moving the batch would trigger the removal
+			   of the originating molecule. Default true.

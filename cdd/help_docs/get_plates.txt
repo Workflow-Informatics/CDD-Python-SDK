@@ -1,0 +1,21 @@
+
+plates: 
+		Comma-separated list of plate ID's.
+									
+names: 
+		Comma-delimited list of plate names.
+
+locations: 
+		Comma-delimited list of plate locations.
+
+async: 
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+page_size: 
+		The maximum # of objects to return.
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.

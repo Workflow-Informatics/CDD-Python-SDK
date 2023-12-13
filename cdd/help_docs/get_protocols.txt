@@ -1,0 +1,58 @@
+
+protocols: 
+		Comma-separated list of protocol ids.
+		Cannot be used with other parameters.
+
+names: 
+		Comma-separated list of protocol names.
+		Cannot be used with other parameters.
+
+async: 	
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+only_ids: 
+		Boolean. If true, only the Protocol IDs are returned,
+		allowing for a smaller and faster response. Default: false.
+
+created_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+created_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+runs_modified_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+runs_modified_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+plates: 
+		Comma-separated list of plate ids.
+
+molecules: 
+		Comma-separated list of molecule ids.
+
+page_size: 
+		The maximum # of objects to return.
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.
+
+data_sets: 
+		Comma-separated list of public data set ids.
+		Defaults to no data sets. Limits scope of query.
+	
+slurp: 
+		Specify the slurp_id of an import operation.
+		Once an import has been committed, you can return
+		additional JSON results that will expose the Protocol
+		and Run(s) of data that were imported.

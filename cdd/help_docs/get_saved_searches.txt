@@ -1,0 +1,25 @@
+
+projects:
+		Comma-separated list of project ID's.
+		A list of projects to search.
+
+data_sets:
+		Comma-separated list of data set ID's.
+		A list of public data sets to search.
+
+zip:
+		Whether to zip the data returned in the saved search response.
+
+		Value must be either:
+
+			'true'
+			'false'
+
+format:
+		Format of the returned search. Defaults to csv.
+
+		Value must be one of:
+
+			'csv'
+			'sdf'
+			'xlsx'
