@@ -1,0 +1,27 @@
+
+batch_ids: 
+		Comma separated list of Batch ids.
+
+inventory_sample_ids: 
+		Comma separated list of Sample ids
+
+created_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+created_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_before: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_after: 
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+projects: 
+		Comma-separated list of project ids.
+		Defaults to all available projects.
+		Limits scope of query.
+
+async: 
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.

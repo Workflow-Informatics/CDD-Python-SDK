@@ -527,6 +527,29 @@ class VaultClient(object):
 		return contents
 
 
+	@appendToDocString(helpDoc="get_sample_inventory.txt")
+	def getInventorySamples(self, asDataFrame=True, **kwargs):
+		"""
+		:Description: return sample inventory information for batches in CDD.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/20703796893332-Inventory-Samples-GET-POST-PUT-
+		"""
+
+		helpDoc = "get_sample_inventory.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc)
+
+
+		# Send request to CDD API:
+
+		suffix = "/inventory_samples"
+
+		samples = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
+		if asDataFrame: samples = pd.DataFrame.from_dict(samples)
+
+		return samples
+
+
 	def getMappingTemplates(self, id=None, asDataFrame=True):
 		"""
 		:Description: returns summary information on all available mapping templates in the Vault specified.
