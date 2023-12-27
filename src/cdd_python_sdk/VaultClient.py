@@ -23,7 +23,6 @@ If you're stuck, check out the Quickstart Guide
 import base64
 import datetime as dt
 import json
-import numpy as np
 import os
 import pandas as pd
 import re
