@@ -552,10 +552,10 @@ class VaultClient(object):
 
 	def getMappingTemplates(self, id=None, asDataFrame=True):
 		"""
-		:Description: returns summary information on all available mapping templates in the Vault specified.
+		:Description: return summary information on all available mapping templates in the specified Vault.
 
-					  Alternatively, if 'id' argument is set, will retrieve details on the data objects mapped 
-					  within a specific mapping template.
+					  Alternatively, if 'id' argument is set, only retrieve details on the data objects mapped 
+					  for a specific mapping template.
 
 					  Additional fields when id argument is set include:
 
@@ -777,8 +777,8 @@ class VaultClient(object):
 	def getSavedSearches(self, searchID=None, format="csv", zip=False, filePath=None, 
 										asDataFrame=True, **kwargs):
 		"""
-		:Description: returns either a list of available saved searches if 'searchID' is not specified
-					  or executes a saved search using the specified 'searchID'.
+		:Description: return either a list of available saved searches if 'searchID' is None
+					  or execute a saved search using the specified 'searchID'.
 
 		:searchID (int or str): unique ID for the target saved search. If no search ID
 								is provided, will return a list of available saved searches
@@ -798,7 +798,7 @@ class VaultClient(object):
 						 Must be provided if 'zip=True' or 'format=sdf'.
 
 		:asDataFrame (bool): whether to return the search results as a Pandas DataFrame.
-							 This is only used if 'searchID=None' which is the default.
+							 This is only used if 'searchID=None' (the default).
 
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005699026-Saved-Search-es-GET-
 		"""
