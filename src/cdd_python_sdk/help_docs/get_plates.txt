@@ -1,6 +1,6 @@
 
 plates: 
-		Comma-separated list of plate ID's.
+		Comma-delimited list of plate ID's.
 									
 names: 
 		Comma-delimited list of plate names.
@@ -16,6 +16,26 @@ page_size:
 		The maximum # of objects to return.
 
 projects: 
-		Comma-separated list of project ids.
+		Comma-delimited list of project ids.
 		Defaults to all available projects.
 		Limits scope of query.
+
+data_sets:
+		Comma-delimited list of public dataset ids.
+		Defaults to no data sets. Limits scope of query.
+
+created_before:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+created_after:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_before:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+modified_after:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
+
+only_ids:
+		Boolean. If true, only the Molecule ID's are returned, 
+		allowing for a smaller and faster response. Default: false.

@@ -501,7 +501,7 @@ class VaultClient(object):
 
 	def getFile(self, fileID, destFolder=None):
 		"""
-		:Description: retrieves a single file object from CDD Vault using its file ID.
+		:Description: retrieve a single file object from CDD Vault using its file ID.
 
 		:destFolder (str): destination folder where file contents should be written to.
 						   File name will default to the original name of the file when
