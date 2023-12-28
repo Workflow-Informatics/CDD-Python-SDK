@@ -38,6 +38,9 @@ finalized_date_before:
 finalized_date_after: 
 		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
 
+page_size: 
+		The maximum # of objects to return.
+
 projects: 
 		Comma-separated list of project ids.
 		Defaults to all available projects.

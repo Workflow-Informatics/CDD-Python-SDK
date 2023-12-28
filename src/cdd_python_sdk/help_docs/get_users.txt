@@ -1,0 +1,4 @@
+
+include_projects: 
+		Boolean. If true, each user’s Vault role and an array of their project memberships
+		are returned.

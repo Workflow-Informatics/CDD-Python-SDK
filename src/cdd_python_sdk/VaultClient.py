@@ -424,7 +424,7 @@ class VaultClient(object):
 	def getELNEntries(self, summary=True, asDataFrame=True, 
 					  exportPath=None, unzipELNEntries=False, **kwargs):
 		"""
-		:Description: returns information on the ELN entries for the specified vault.
+		:Description: return information on the ELN entries for the specified vault.
 
 		:summary (bool): if true, returns summary data for the requested ELN entries.
 
@@ -477,7 +477,7 @@ class VaultClient(object):
 
 	def getFields(self, asDataFrame=True):
 		"""
-		:Description: returns a list of available fields for the given vault.
+		:Description: return a list of available fields for the specified vault.
 
 					  This API call will provide you with the “type” and “name” values of *all* fields within a Vault. 
 					  The json keys returned by this API call are organized into the following:
@@ -887,6 +887,37 @@ class VaultClient(object):
 		return savedSearches
 
 
+	@appendToDocString(helpDoc="get_users.txt")
+	def getUsers(self, **kwargs):
+		"""
+		:Description: return a list of CDD Vault members. 
+
+					  This method is helpful for identifying user
+					  ID's for use with the getELNEntries() method.
+		
+					  Note that this request can only be initiated 
+					  by Vault administrators. 
+
+		"""
+
+		# Retrieve valid keyword arguments from help documentation:
+
+		helpDoc = "get_users.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc)
+
+
+		# Send request:
+
+		queryString = self.buildQueryString(kwargs, valid_kwargs)
+
+		suffix = "/users"
+		URL = self.URL + suffix + queryString
+
+		users = self.sendGetRequest(URL)
+
+		return users
+
+
 	@staticmethod
 	def getVaults(apiKey, asDataFrame=True):
 		"""
@@ -978,7 +1009,7 @@ class VaultClient(object):
 
 	def postELNEntries(self, project, title=None, eln_fields={}):
 		"""
-		:Description: creates a new ELN entry.
+		:Description: create a new ELN entry in CDD Vault.
 
 		:project (str): the project ID or name where the new ELN entry will be created.
 
@@ -1006,7 +1037,7 @@ class VaultClient(object):
 
 	def postFiles(self, objectType, objectID, fileName):
 		"""
-		:Description: attaches a file to an object (Run, Molecule, Protocol or ELN entry).
+		:Description: attach a file to an object (Run, Molecule, Protocol or ELN entry).
 
 		:objectType (str): specifies the CDD object type to which the file will be attached.
 						   Value must be one of: 'molecule', 'protocol', 'run', or 'eln_entry'.
