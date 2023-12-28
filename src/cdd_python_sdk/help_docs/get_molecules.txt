@@ -14,9 +14,19 @@ no_structures:
 		Boolean. If true, omit structure representations
 		for a smaller and faster response. Default: false.
 
+include_original_structures: 
+		Boolean. If true, include the original user-defined 
+		structure for each molecule. Default: false.
+
 only_ids: 
 		Boolean. If true, only the Molecule IDs are returned,
-		allowing for a smaller and faster response. Default: false
+		allowing for a smaller and faster response. Default: false.
+
+only_batch_ids: 
+		Boolean. If true, the full Molecule details are still returned 
+		but the Batch-level information is left out of the JSON results. 
+		(Only the IDs of the Batches belonging to the Molecules are still 
+		included.) Default: false.
 
 created_before: 
 		Date (YYYY-MM-DDThh:mm:ss±hh:mm)

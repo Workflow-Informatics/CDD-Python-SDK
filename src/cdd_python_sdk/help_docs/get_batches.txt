@@ -11,10 +11,19 @@ no_structures:
 		Boolean. If true, omit structure representations
 		for a smaller and faster response. Default: false.
 
+include_original_structures: 
+		Boolean. If true, include the original user-defined 
+		structure for each molecule. Default: false.
+
 only_ids: 
 		Boolean. If true, only the Batch IDs are returned,
 		allowing for a smaller and faster response. Default: false.
 
+only_molecule_ids:
+		Boolean. If true, the full Batch details are still returned but 
+		the Molecule-level information is left out of the JSON results 
+		(Only the ID's of the Molecules are still included). Default: false.
+		
 created_before: 
 		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
 
@@ -58,4 +67,5 @@ batch_fields:
 		Use this parameter to limit the number of Batch UDF Fields to return.
 
 fields_search: 
-		Array of Batch field names & values. Used to filter Batches returned based on query values.
+		Array of Batch field names & values. 
+		Used to filter Batches returned based on query values.

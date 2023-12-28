@@ -15,8 +15,7 @@ ________________________________________________________________________________
 
 This python library encompasses all of the API function calls provided by CDD Vault.
 
-If you're stuck, check out the Quickstart Guide
-
+If you're stuck, check out the Quickstart Guide.
 
 '''
 
