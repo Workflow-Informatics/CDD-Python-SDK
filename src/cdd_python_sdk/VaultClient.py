@@ -291,6 +291,34 @@ class VaultClient(object):
 		return objects
 
 
+	@appendToDocString(helpDoc="get_api_execution_metrics.txt")
+	def getAPIExecutionMetrics(self, **kwargs):
+		"""
+		:Description: return the api usage (both async and sync) in seconds between a particular timeframe. 
+					  Use 'after' and 'before' parameters to specify a date range. By default, the time usage 
+					  of the previous 30 days are returned. The time returned is for the current API key only.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/13781890848660-Api-Execution-Metrics-GET-
+		"""
+
+		# Retrieve valid keyword arguments from help documentation:
+
+		helpDoc = "get_api_execution_metrics.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc)
+
+
+		# Send request:
+
+		queryString = self.buildQueryString(kwargs, valid_kwargs)
+
+		suffix = "/api_executions"
+		URL = self.URL + suffix + queryString
+
+		usageMetrics = self.sendGetRequest(URL)
+
+		return usageMetrics
+
+
 	def getAsyncExport(self, exportID, interval=5.0, asText=False, asBytes=False, statusUpdates=True):
 		"""
 		:Description: used to both check the status of an in-progress CDD asynchronous export,
@@ -361,6 +389,9 @@ class VaultClient(object):
 	def getBatchMoveJobs(self, batchMoveJobID=None):
 		"""
 		:Description: retrieve the statuses of one or more batch move jobs from CDD Vault queue.
+					  Batch move jobs are used to move a batch to a different molecule in the same vault.
+					
+					  Note that this request can only be initiated by Vault administrators. 
 
 		:batchMoveJobID (int or str): the unique ID of the batch move job to retrieve.
 		"""
@@ -616,7 +647,7 @@ class VaultClient(object):
 	@appendToDocString(helpDoc="get_plates.txt")
 	def getPlates(self, asDataFrame=True, **kwargs):
 		"""
-		:Description: return a collection of plates from CDD vault. 
+		:Description: return a collection of plates from CDD Vault. 
 		
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-DELETE-
 		"""
@@ -656,7 +687,7 @@ class VaultClient(object):
 	@appendToDocString(helpDoc="get_protocols.txt")
 	def getProtocols(self, asDataFrame=True, **kwargs):
 		"""
-		:Description: returns a list of protocols based on criteria as specified by parameters:
+		:Description: return a list of protocols from CDD Vault.
 		
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685406-Protocol-s-GET-
 		"""
@@ -736,7 +767,7 @@ class VaultClient(object):
 	@appendToDocString(helpDoc="get_readout_rows.txt")
 	def getReadoutRows(self, asDataFrame=True, **kwargs):
 		"""
-		:Description: returns (a subset of) the readout data for any number of protocols.
+		:Description: return (a subset of) the readout data for any number of protocols.
 
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360059600831-Readout-Rows-GET-PUT-DELETE-
 		"""
