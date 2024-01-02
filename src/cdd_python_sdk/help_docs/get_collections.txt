@@ -1,0 +1,38 @@
+
+collections:
+		Comma separated list of ID's.
+		Cannot be used with Date and Type parameters.
+
+async:
+		Boolean. If true, do an asynchronous export (see Async Export).
+		Use for large data sets. Note - always set to True when using Python API.
+
+only_ids:
+		Boolean. If true, only the Collection ID's are returned, allowing for a smaller and 
+		faster response. (Async should still be used when many ID's are expected.) Default: false.
+
+include_molecule_ids:
+		Boolean. If true, the molecule ID's will be returned as an array using the molecules JSON key.
+		Default: false.
+
+created_before:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm).
+
+created_after:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm).
+
+modified_before:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm).
+
+modified_after:
+		Date (YYYY-MM-DDThh:mm:ss±hh:mm).
+
+page_size:
+		The maximum # of objects to return.
+
+projects:
+		Comma-separated list of project ID's. Defaults to all available projects. Limits scope of query.
+
+type:
+		Comma-separated list of collection types to return. Possible options are user_collection (private) 
+		and vault_collection (shared with project members).

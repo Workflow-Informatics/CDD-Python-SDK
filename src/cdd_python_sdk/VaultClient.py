@@ -432,6 +432,31 @@ class VaultClient(object):
 		return batches
 
 
+	@appendToDocString(helpDoc="get_collections.txt")
+	def getCollections(self, asDataFrame=True, **kwargs):
+		"""
+		:Description: return info on collection objects (includes both user and vault collections, by default).
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/18707906579604-Collection-s-GET-POST-PUT-DELETE-
+		"""
+
+		# Retrieve valid keyword arguments from help documentation:
+
+		helpDoc = "get_collections.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc)
+
+
+		# Get collections + format output:
+
+		suffix = "/collections"
+
+		collections = self.sendSyncAndAsyncGets(suffix, kwargs, valid_kwargs)
+
+		if asDataFrame: collections = pd.DataFrame.from_dict(collections)
+
+		return collections
+
+
 	def getDatasets(self, asDataFrame=True):
 		"""
 		:Description: returns a list of accessible public data sets for the given vault.
