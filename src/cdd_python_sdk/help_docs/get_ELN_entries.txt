@@ -1,10 +1,10 @@
 
 eln_entries: 
-		Comma-separated list of ELN entry IDs.
+		Comma-separated list of ELN entry ID's.
 
 author: 
 		Comma separated list of ELN author ID's.
-		Note: Must be users' ID's, users' names cannot be used.
+		Note: Must be user ID's (user names cannot be used).
 
 status:
 		Returns ELN entries that have the status specified.
@@ -13,6 +13,14 @@ status:
 only_ids: 
 		Boolean. If true, only the ELN entry ID's are returned,
 		allowing for a smaller and faster response. Default: false.
+
+only_summary:
+		Boolean. If true, only a csv summary file will be returned. 
+		This summary csv file will include all system ELN metadata fields,
+		plus all user-defined ELN Fields. Default: false.
+
+		If set to 'true', 'unzipELNEntries' should be set to 'False' since the
+		file contents will instead be written to a csv file.
 
 created_before: 
 		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
@@ -39,9 +47,9 @@ finalized_date_after:
 		Date (YYYY-MM-DDThh:mm:ss±hh:mm)
 
 page_size: 
-		The maximum # of objects to return.
+		The maximum # of objects to return when *not* using the async=true parameter.
 
 projects: 
-		Comma-separated list of project ids.
+		Comma-separated list of project ID's.
 		Defaults to all available projects.
 		Limits scope of query.

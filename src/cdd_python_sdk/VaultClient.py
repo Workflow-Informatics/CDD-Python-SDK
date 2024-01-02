@@ -391,7 +391,7 @@ class VaultClient(object):
 		:Description: retrieve the statuses of one or more batch move jobs from CDD Vault queue.
 					  Batch move jobs are used to move a batch to a different molecule in the same vault.
 					
-					  Note that this request can only be initiated by Vault administrators. 
+					  Note that this request can only be executed by Vault administrators. 
 
 		:batchMoveJobID (int or str): the unique ID of the batch move job to retrieve.
 		"""
@@ -476,18 +476,25 @@ class VaultClient(object):
 
 
 	@appendToDocString(helpDoc="get_ELN_entries.txt")
-	def getELNEntries(self, summary=True, asDataFrame=True, 
+	def getELNEntries(self, asDataFrame=True, 
 					  exportPath=None, unzipELNEntries=False, **kwargs):
 		"""
 		:Description: return information on the ELN entries for the specified vault.
 
-		:summary (bool): if true, returns summary data for the requested ELN entries.
+					  Note that this method can only be executed by Vault administrators. 
 
-		:asDataFrame (bool): returns the summary as a Pandas DataFrame. Only relevant if summary=True.
+		:asDataFrame (bool): returns the summary as a Pandas DataFrame. Only used if exportPath=None.
 
-		:exportPath (str): file path for extracting zipped ELN entries to. Only relevant if summary=False.
+		:exportPath (str): file path for writing zipped ELN entries. Only used if 'exportPath' is not None.
+		
+						   Note that setting an export path will automatically convert the request to an
+						   asynchronous call, which will write a zip file of all available ELN entries to the
+						   specified path.
 
-		:unzipELNEntries (bool): if true, extracts the zip contents of exportPath to a directory.
+						   If exportPath is None (the default), a summary of the specified ELN entries will instead
+						   be returned as a Pandas DataFrame (if asDataFrame=True) or a list of dictionaries.
+
+		:unzipELNEntries (bool): if true, also extracts the zip contents to the 'exportPath' directory.
 
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-POST-
 		"""
@@ -500,7 +507,7 @@ class VaultClient(object):
 
 		# Retrieve summary ELN data:
 
-		if summary:
+		if exportPath is None:
 
 			suffix = "/eln/entries" + self.buildQueryString(kwargs, valid_kwargs)
 			URL = self.URL + suffix
@@ -513,13 +520,12 @@ class VaultClient(object):
 
 		# Retrieve zipped copy of ELN entries + optional extraction:
 
-		suffix = "/eln/entries?async=true" + self.buildQueryString(kwargs, valid_kwargs)
+		suffix = "/eln/entries?async=true&" + self.buildQueryString(kwargs, valid_kwargs)[1:]
 		URL = self.URL + suffix
 
 		exportID = self.sendGetRequest(URL=URL)["id"]
 		elnEntries = self.getAsyncExport(exportID=exportID, asBytes=True)
 
-		if not exportPath.endswith(".zip"): exportPath += ".zip"
 		with open(exportPath, "wb") as f: f.write(elnEntries)
 
 		if unzipELNEntries:
@@ -950,7 +956,7 @@ class VaultClient(object):
 					  This method is helpful for identifying user
 					  ID's for use with the getELNEntries() method.
 		
-					  Note that this request can only be initiated 
+					  Note that this request can only be executed 
 					  by Vault administrators. 
 
 		"""
