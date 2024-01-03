@@ -1361,7 +1361,7 @@ class VaultClient(object):
 	@appendToDocString(helpDoc="post_batches.txt") # Calls help from postBatches() method, since inputs are the same.
 	def putBatches(self, id, data):
 		"""
-		:Description: updates an existing batch. 
+		:Description: update an existing batch. 
 
 		:id (int or str): unique id for an existing batch object in CDD Vault.
 						  Required, unless 'help' is set to True.
@@ -1383,6 +1383,32 @@ class VaultClient(object):
 		
 
 		# Put batch to CDD Vault + get response:
+
+		response = self.sendPutRequest(URL, data)
+
+		return response   
+
+
+	@appendToDocString(helpDoc="put_eln_entries.txt")
+	def putELNEntries(self, entryID, data):
+		"""
+		:Description: update the contents of an existing ELN entry.
+
+					  Includes: 
+					  	
+						updating the title, project, ELN fields and even the body.
+						adding links, text, and files using the 'append_to_body' parameter.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360047137852-ELN-Entries-GET-PUT-POST-
+		"""
+
+		# Construct URL:
+	
+		suffix = f"/eln/entries/{entryID}"
+		URL = self.URL + suffix
+		
+
+		# Put updated ELN entry to CDD Vault + get response:
 
 		response = self.sendPutRequest(URL, data)
 
@@ -1411,7 +1437,7 @@ class VaultClient(object):
 	@appendToDocString(helpDoc="put_molecules.txt")
 	def putMolecules(self, id, data):
 		"""
-		:Description: updates an existing molecule. Some keys behave differently when used with
+		:Description: update an existing molecule. Some keys behave differently when used with
 					  putMolecules() vs. postMolecules(). Run with help=True for more details.
 
 		:id (int or str): unique id for an existing molecule object in CDD Vault.

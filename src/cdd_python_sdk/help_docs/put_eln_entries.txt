@@ -1,0 +1,23 @@
+
+append_to_body: Adds text, links and files into the canvas of an existing ELN Entry.
+
+status: Returns ELN entries that have the status specified.
+		Note: Status values are case-sensitive and valid values are: 
+		
+			open
+			submitted
+			finalized
+
+title: Modifies the Title of the ELN Entry.
+
+project: Modifies the Project association of the ELN Entry.
+
+eln_fields: Modifies the values of the customer-defined ELN Fields. 
+			Syntax resembles:
+
+				"eln_fields":
+
+				{"field1":"new value for field1",
+
+					"field2":"new value for field2"}
+					
