@@ -1389,6 +1389,25 @@ class VaultClient(object):
 		return response   
 
 
+	def putInventorySamples(self, sampleID, data):
+		"""
+		:Description: update an existing Sample with a new Sample Inventory Event row.
+
+		:sampleID (int or str): unique ID of the inventory sample to update.
+
+		:data: must be either a valid json object, or a string file path to a valid json file. 
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/20703796893332-Inventory-Samples-GET-POST-PUT-
+		"""
+
+		suffix = f"/inventory_samples/{sampleID}"
+		URL = self.URL + suffix
+
+		response = self.sendPutRequest(URL, data)
+
+		return response
+
+
 	@appendToDocString(helpDoc="put_molecules.txt")
 	def putMolecules(self, id=None, data=None):
 		"""
