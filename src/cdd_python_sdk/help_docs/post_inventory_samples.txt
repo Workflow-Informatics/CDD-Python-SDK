@@ -1,0 +1,24 @@
+
+batch_id: The internal Batch ID for which the new Sample will be created.
+
+units: Used to specify the Units of the Sample's initial amount. 
+	   Allowed values are:
+
+		g
+		kg
+		mg
+		µg
+		ng
+		mL
+		L
+		µL
+		M
+		mM
+		µM
+		count
+
+fields: Used to specify the user-defined Sample fields created by the Vault Administrator in the 
+		Settings > Vault > Sample/Inventory Fields tab.
+
+inventory_events: Used to specify the user-defined Sample Inventory Event fields created by the 
+				  Vault Administrator in the Settings > Vault > Sample/Inventory Fields tab.

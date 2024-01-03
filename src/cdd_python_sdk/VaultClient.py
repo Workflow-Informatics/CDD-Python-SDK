@@ -1194,13 +1194,38 @@ class VaultClient(object):
 		return response.json()
 	
 
+	@appendToDocString(helpDoc="post_inventory_samples.txt")
+	def postInventorySamples(self, data):
+		"""
+		:Description: create a new Sample for a particular Batch ID. 
+		
+					  Note that the POST request must include a 'Credit' attribute indicating
+					  the initial inventory amount in the Inventory Sample Event information.
+
+		:data: Must be either a valid json object or a string file path to a valid json file.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/20703796893332-Inventory-Samples-GET-POST-PUT-
+		"""
+
+		# Construct URL:
+
+		suffix = "/inventory_samples"
+		URL = self.URL + suffix
+		
+
+		# Post inventory sample to CDD Vault + get response:
+
+		response = self.sendPostRequest(URL, data)
+
+		return response
+
+
 	@appendToDocString(helpDoc="post_molecules.txt")
-	def postMolecules(self, data=None):
+	def postMolecules(self, data):
 		"""
 		:Description: registers a new molecule in CDD Vault.
 
-		:data: required, unless 'help' is set to True. Must be either a valid json object,
-			   or a string file path to a valid json file.
+		:data: Must be either a valid json object or a string file path to a valid json file.
 
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-
 		"""
