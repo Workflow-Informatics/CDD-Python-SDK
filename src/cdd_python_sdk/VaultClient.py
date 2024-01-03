@@ -704,7 +704,7 @@ class VaultClient(object):
 		"""
 		:Description: retrieve dose-response curves/plots for a single Batch.
 
-		
+
 		"""
 
 		assert size in ["small", "medium", "large"], "Not a valid value."
@@ -811,7 +811,7 @@ class VaultClient(object):
 		valid_kwargs = self.getValidKwargs(helpDoc)
 
 
-		# Send request to CDD API:
+		# Send request to CDD:
 
 		suffix = f"/readout_rows"
 
@@ -821,19 +821,45 @@ class VaultClient(object):
 		return readoutRows
 
 
-	def getRun(self, runID):
+	@appendToDocString(helpDoc="get_runs.txt")
+	def getRun(self, runID=None, **kwargs):
 		"""
-		:Description: retrieve a single run using its unique run ID.
+		:Description: retrieve a single run using its unique run ID or a
+					  set of runs using their Slurps Import ID, creation dates, etc.
+
+					  Note that kwarg arguments will only be
+					  used if 'runID' is set to None (the default).
 		
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE- 
 		"""
 
-		suffix = f"/runs/{runID}"
-		URL = self.URL + suffix
+		# Retrieve valid keyword arguments from help documentation:
 
-		run = self.sendGetRequest(URL)
+		helpDoc = "get_runs.txt"
+		valid_kwargs = self.getValidKwargs(helpDoc)
 
-		return run
+
+		# Send request for single-run to CDD:
+
+		if runID is not None:
+
+			suffix = f"/runs/{runID}"
+			URL = self.URL + suffix
+
+			run = self.sendGetRequest(URL)
+
+			return run
+
+
+		# Send request for multiple runs to CDD:
+
+		queryString = self.buildQueryString(kwargs, valid_kwargs)
+		suffix = f"/runs"
+		URL = self.URL + suffix + queryString
+
+		runSet = self.sendGetRequest(URL)
+
+		return runSet
 
 
 	@appendToDocString(helpDoc="get_saved_searches.txt")
