@@ -1359,7 +1359,7 @@ class VaultClient(object):
 
 
 	@appendToDocString(helpDoc="post_batches.txt") # Calls help from postBatches() method, since inputs are the same.
-	def putBatches(self, id=None, data=None):
+	def putBatches(self, id, data):
 		"""
 		:Description: updates an existing batch. 
 
@@ -1409,7 +1409,7 @@ class VaultClient(object):
 
 
 	@appendToDocString(helpDoc="put_molecules.txt")
-	def putMolecules(self, id=None, data=None):
+	def putMolecules(self, id, data):
 		"""
 		:Description: updates an existing molecule. Some keys behave differently when used with
 					  putMolecules() vs. postMolecules(). Run with help=True for more details.
@@ -1437,37 +1437,35 @@ class VaultClient(object):
 		return response   
 
 
-	def putRuns(self, id=None, data=None):
+	@appendToDocString(helpDoc="put_plates.txt")
+	def putPlates(self, id, data):
 		"""
-		:Description: updates an existing run. 
+		:Description: update an existing plate in CDD Vault.
 
-		:id (int or str): unique id for an existing run object in CDD Vault.
-						  Required, unless 'help' is set to True.
+		:id (int or str): unique id for an existing plate object in CDD Vault.
 
-		:data: Must be either a valid json object, or a string file path to a valid json file. 
+		:data: Must be either a valid json dictionary object, or a string file path to a valid json file. 
+			   See the 'valid CDD Keyword arguments' in help for a list of valid keys to pass.
 
-			   Fields not specified in the JSON are not changed. Allows users to update the run Project association 
-			   and the Run_Date, Person, Place, and Conditions fields. Required, unless 'help' is set to True. 
-
-		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739586-Plate-s-GET-POST-PUT-DELETE-
 		"""
 
 		# Construct URL:
 	
-		suffix = f"/runs/{id}"
+		suffix = f"/plates/{id}"
 		URL = self.URL + suffix
 		
 
-		# Put run to CDD Vault + get response:
+		# Put plate to CDD Vault + get response:
 
 		response = self.sendPutRequest(URL, data)
 
 		return response   
- 
 
-	def putReadoutRows(self, id=None, data=None):
+
+	def putReadoutRows(self, id, data):
 		"""
-		:Description: updates an existing readout row (including the ability to flag an existing readout row as an outlier).
+		:Description: update an existing readout row (including the ability to flag an existing readout row as an outlier).
 
 					  Allows a user to update a specified row of Protocol data, set its value to null, or flag a specified 
 					  row of Protocol data as an outlier.
@@ -1504,6 +1502,43 @@ class VaultClient(object):
 
 		return response   
 	
+
+	def putRuns(self, id, data):
+		"""
+		:Description: update an existing run. 
+
+		:id (int or str): unique id for an existing run object in CDD Vault.
+
+		:data: Must be either a valid json object, or a string file path to a valid json file. 
+
+			   Fields not specified in the JSON are not changed. Allows users to update the run Project association 
+			   and the Run_Date, Person, Place, and Conditions fields. Required, unless 'help' is set to True. 
+
+			   Example Value:
+
+					{
+						"project":"New Project",
+						"run_date":"2020-09-14",
+						"conditions":"New Condition",
+						"place":"New Lab",
+						"person":"New Person"
+					}
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/360024315171-Run-s-GET-PUT-DELETE-#update
+		"""
+
+		# Construct URL:
+	
+		suffix = f"/runs/{id}"
+		URL = self.URL + suffix
+		
+
+		# Put run to CDD Vault + get response:
+
+		response = self.sendPutRequest(URL, data)
+
+		return response   
+ 
 
 	def sendDeleteRequest(self, URL):
 

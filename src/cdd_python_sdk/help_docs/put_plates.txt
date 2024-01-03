@@ -1,0 +1,23 @@
+
+name: Specify a new name for the Plate.
+
+projects: An array of Projects where the Plate will be moved.
+
+location: Updates the plate's location.
+
+concentration: Updates the plate's concentration.
+
+concentration_unit_label: Updates the plate's concentration unit.
+
+volume: Updates the plate's volume.
+
+volume_unit_label: Updates the plate's volume unit.
+
+wells: Updates the array of Batches to be associated with the Plate's Wells. 
+	   Syntax should resemble:
+
+		"wells": [
+			{"pos":"A01","batch":142517171},
+			{"pos":"A02","batch":126705604},
+			{"pos":"A03","batch":126705581}
+		]
