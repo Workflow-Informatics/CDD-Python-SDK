@@ -702,7 +702,9 @@ class VaultClient(object):
 
 	def getPlot(self, batchID, protocolID, size="small", destFolder=None):
 		"""
-		:Description:
+		:Description: retrieve dose-response curves/plots for a single Batch.
+
+		
 		"""
 
 		assert size in ["small", "medium", "large"], "Not a valid value."
