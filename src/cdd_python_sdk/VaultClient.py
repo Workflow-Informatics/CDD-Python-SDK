@@ -1516,28 +1516,6 @@ class VaultClient(object):
 		return response.json()
 
 
-	def deleteFiles(self, fileID):
-		"""
-		:Description: deletes a single file attached to an object (Run, Molecule, Protocol or ELN entry)
-					  using its unique file ID.
-
-		:fileID (int or str): unique ID for an existing file in CDD vault.
-
-		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
-		"""
-
-		# Construct URL:
-
-		suffix = f"/files/{fileID}"
-		URL = self.URL + suffix
-		
-		# Delete file present in CDD Vault + get response:
-		
-		response = self.sendDeleteRequest(URL)
-		
-		return response
-
-
 	def deleteBatchMoveJob(self, batchMoveJobID):
 		"""
 		:Description: cancels a single batch move job. Cannot be used to cancel a job already in progress.
@@ -1559,7 +1537,7 @@ class VaultClient(object):
 
 	def deleteBatches(self, id):
 		"""
-		:Description: deletes a batch present in CDD Vault.
+		:Description: delete a batch present in CDD Vault.
 
 					  Note that for safety/security purposes, batches which have data associated with them cannot be deleted 
 					  via this method call. Data (such as rows of readout data in a Protocol Run) must be removed prior to using 
@@ -1574,9 +1552,28 @@ class VaultClient(object):
 		return self.putBatches(id, data={"projects": []})
 
 
+	def deleteCollections(self, id):
+		"""
+		:Description: delete the collection as specified by its unique ID from CDD Vault.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/18707906579604-Collection-s-GET-POST-PUT-DELETE-
+		"""
+
+		# Construct URL:
+
+		suffix = f"/collections/{id}"
+		URL = self.URL + suffix
+
+		# Delete collection from CDD Vault + retrieve response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
+
+
 	def deleteExport(self, id):
 		"""
-		:Description: deletes an in-progress asynchronous export.
+		:Description: delete an in-progress asynchronous export.
 
 					  Primarily used during keyboard interrupts in the
 					  getAsyncExport() method.
@@ -1596,9 +1593,31 @@ class VaultClient(object):
 		return response
 
 
+	def deleteFiles(self, fileID):
+		"""
+		:Description: delete a single file attached to an object (Run, Molecule, Protocol or ELN entry)
+					  using its unique file ID.
+
+		:fileID (int or str): unique ID for an existing file in CDD vault.
+
+		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005739786-Files-GET-POST-DELETE-
+		"""
+
+		# Construct URL:
+
+		suffix = f"/files/{fileID}"
+		URL = self.URL + suffix
+		
+		# Delete file present in CDD Vault + get response:
+		
+		response = self.sendDeleteRequest(URL)
+		
+		return response
+
+
 	def deleteMolecules(self, id):
 		"""
-		:Description: deletes a molecule present in CDD Vault.
+		:Description: delete a molecule present in CDD Vault.
 		
 		:Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685466-Molecule-s-GET-POST-PUT-#update
 		"""
@@ -1611,7 +1630,7 @@ class VaultClient(object):
 
 	def deletePlates(self, id):
 		"""
-		:Description: deletes a single existing plate in CDD Vault using its plate ID.
+		:Description: delete a single existing plate in CDD Vault using its plate ID.
 
 		:id (int or str): unique ID for an existing plate in CDD vault.
 
@@ -1632,7 +1651,7 @@ class VaultClient(object):
 
 	def deleteReadoutRows(self, id):
 		"""
-		:Description: deletes a single readout row associated with protocol data in CDD Vault using its unique ID.
+		:Description: delete a single readout row associated with protocol data in CDD Vault using its unique ID.
 
 		:id (int or str): unique ID for an existing readout row in CDD vault.
 
@@ -1653,7 +1672,7 @@ class VaultClient(object):
 
 	def deleteRuns(self, id, slurps=False):
 		"""
-		:Description: either deletes a single run from CDD vault or deletes all runs associated with a 
+		:Description: either deletes a single run from CDD vault or delete all runs associated with a 
 					  single slurps upload.
 
 		:id (int or str): must be either an existing run ID if slurps=False, otherwise a valid slurps ID.
