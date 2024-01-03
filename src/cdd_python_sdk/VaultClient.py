@@ -650,6 +650,32 @@ class VaultClient(object):
 		return response
 
 
+	def getMoleculeImage(self, molID, filePath=None):
+		"""
+		:Description: retrieve an image of the registered Molecule from CDD identified 
+					  by its unique molecule ID.
+
+		modID (int or str): unique ID identifying the molecule for which the image will
+							be retrieved.
+
+		:return (bytes): a bytes-object representing the exported molecule image file.
+		"""
+
+		suffix = f"/molecules/{molID}/image"
+
+		URL = self.URL + suffix
+
+		exportID = self.sendGetRequest(URL=URL)["id"]
+
+		molImage = self.getAsyncExport(exportID=exportID, asBytes=True)
+
+		if filePath: 
+
+			with open(filePath, "wb") as f: f.write(molImage)
+
+		return molImage
+
+
 	@appendToDocString(helpDoc="get_molecules.txt")
 	def getMolecules(self, asDataFrame=True, **kwargs):
 		"""
