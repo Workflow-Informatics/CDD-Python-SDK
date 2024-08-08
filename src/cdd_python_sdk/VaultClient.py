@@ -13,17 +13,19 @@ You are solely responsible for the protection of your equipment and backup of yo
 Workflow Informatics will not be liable for any damages you may suffer in connection with using or modifying this SOFTWARE PRODUCT
 ______________________________________________________________________________________________________________________________________________
 
-This python library encompasses all of the API function calls provided by CDD Vault.
+This python library encompasses most of the API function calls provided by CDD Vault.
 
 If you're stuck, check out the Quickstart Guide.
 
 '''
 
-import base64
+
 import datetime as dt
+import pandas as pd
+
 import json
 import os
-import pandas as pd
+import base64
 import re
 import requests
 import sys
@@ -31,7 +33,6 @@ import time
 import zipfile
 
 from io import StringIO
-
 
 helpDir = os.path.join(
 				os.path.dirname(__file__),
@@ -610,6 +611,23 @@ class VaultClient(object):
 
 		return samples
 
+
+	def getInventoryLocations(self, asDataFrame=True):
+		"""
+		:Description: Return a list of Sample Inventory Locations for the given Vault
+
+		:return: either a json list or a Pandas DataFrame.
+
+		:reference: https://support.collaborativedrug.com/hc/en-us/articles/21003867672212-Inventory-Locations-GET
+		"""
+
+		suffix = "/inventory_locations"
+		URL = self.URL + suffix
+
+		locations = self.sendGetRequest(URL=URL)
+		if asDataFrame: locations = pd.DataFrame(locations)
+			
+		return locations
 
 	def getMappingTemplates(self, id=None, asDataFrame=True):
 		"""
