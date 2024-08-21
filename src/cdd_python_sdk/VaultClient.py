@@ -1261,7 +1261,7 @@ class VaultClient(object):
 		return response
 	
 
-	def postSlurpsData(self, fileName, project, mappingTemplate=None, runs=None, interval=5.0):
+	def postSlurpsData(self, fileName, project, mappingTemplate=None, runs=None, autoreject=None, ambiguous_events_resolution=None, suspicious_events_resolution=None, interval=5.0):
 		"""
 		:Description: bulk import for programmatically importing data into CDD Vault. Uses an existing mapping template to map the data in the
 					  import file into CDD Vault. Once a file has been uploaded through the API, data from the import is committed immediately 
@@ -1278,15 +1278,32 @@ class VaultClient(object):
 
 		:runs (dict): a single run detail object which will be applied to all new runs present in the file.
 
-					  Valid keys include:
+						Valid keys include:
 
-							:run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today’s date.
+							:run_date: use YYYY-MM-DDThh:mm:ss:hh:mm. Default is today's date.
 
 							:place: this field is called 'lab' within the CDD Vault web interface. No default value provided.
 
 							:person: default value is user's full name.
 
 							:conditions: no default value provided.
+
+		:autoreject: optional. Designate if unresolved ambiguous events, suspicious events, or errors will cause the import to be automatically 
+						rejected (default behaviour) or be left active in the Import Data tab for the user to resolve within the interface.
+		
+		:ambiguous_events_resolution (str): 
+						Valid options:
+							: "none" :  Default Do not resolve ambiguous events. See autoreject parameter for behavior.
+							: "reject" : Automatically reject all ambiguous events.
+							: "new_molecule" : Automatically create new molecules for all ambiguous events.
+							: "new_batch" : Automatically create new batches on the first matching molecule for all ambiguous events.
+
+		:suspicious_events_resolution (str): 
+						Valid options:
+							: "none" : Default Do not resolve suspicious events. See autoreject parameter for behavior.
+							: "reject" : Automatically reject all suspicious events.
+							: "accept" : Automatically accept all suspicious events.
+
 
 		Reference: https://support.collaborativedrug.com/hc/en-us/articles/115005685526-Slurps-Post-i-e-Bulk-Import-of-Data-via-Files
 		"""
@@ -1310,6 +1327,13 @@ class VaultClient(object):
 				assert k in validKeys, f"'{k}' is not a valid key for a run detail object."
 
 			jsonObj["runs"] = runs
+
+		if autoreject:
+			jsonObj["autoreject"] = autoreject
+		if ambiguous_events_resolution:
+			jsonObj["ambiguous_events_resolution"] = ambiguous_events_resolution
+		if suspicious_events_resolution:
+			jsonObj["suspicious_events_resolution"] = suspicious_events_resolution
 			
 		jsonObj = json.dumps(jsonObj)
 
