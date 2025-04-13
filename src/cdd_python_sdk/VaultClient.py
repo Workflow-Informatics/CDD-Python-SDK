@@ -240,18 +240,14 @@ class VaultClient(object):
 	def sendGetRequest(self, URL, asText=False, asBytes=False):
 
 		headers = {"X-CDD-Token": self.apiKey}
+
 		response = requests.get(URL, headers=headers)
 
-		if asText and response.status_code == 200:
+		response.raise_for_status()
 
-			return response.text
+		if asText: return response.text
 
-		elif asBytes and response.status_code == 200:
-
-			return response.content
-
-		# Check for errors:
-		assert (response.status_code == 200), response.json()
+		elif asBytes: return response.content
 
 		return response.json()
 
@@ -1063,11 +1059,12 @@ class VaultClient(object):
 
 		headers = {"X-CDD-TOKEN": apiKey}
 
-		vaults = requests.get(URL, headers=headers)
-		
-		assert vaults.ok, vaults.reason
-		
-		vaults = vaults.json()
+		response = requests.get(URL, headers=headers)
+
+		response.raise_for_status()
+				
+		vaults = response.json()
+
 		if asDataFrame: vaults = pd.DataFrame(vaults)
 
 		return vaults
@@ -1091,8 +1088,7 @@ class VaultClient(object):
 
 		response = requests.post(URL, headers=headers, json=jsonObj)
 
-		# Check for errors:
-		assert (response.status_code == 200), response.json()
+		response.raise_for_status()
 		
 		return response.json()
 
@@ -1207,7 +1203,8 @@ class VaultClient(object):
 				 "resource_id": (None, objectID)}
 
 		response = requests.post(URL, headers=headers, files=files)
-		assert (response.status_code == 200), response.json()
+		
+		response.raise_for_status()
 
 		return response.json()
 	
@@ -1346,7 +1343,8 @@ class VaultClient(object):
 		headers = {"X-CDD-Token": self.apiKey}
 
 		response = requests.post(URL, headers=headers, files=files, data={"json": jsonObj})
-		assert (response.status_code == 200), response.json()
+
+		response.raise_for_status()
 
 
 		# Check status of bulk upload until completed:
@@ -1371,7 +1369,8 @@ class VaultClient(object):
 		URL = self.URL + f"/protocols?slurp={slurpID}"
 
 		outputResponse = requests.get(URL, headers=headers)
-		assert outputResponse.status_code == 200, outputResponse.json()
+		
+		outputResponse.raise_for_status()
 
 		return outputResponse.json()
 
@@ -1394,8 +1393,7 @@ class VaultClient(object):
 
 		response = requests.put(URL, headers=headers, json=jsonObj)
 
-		# Check for errors:
-		assert (response.status_code == 200), response.json()
+		response.raise_for_status()
 		
 		return response.json()
 
@@ -1613,8 +1611,7 @@ class VaultClient(object):
 		headers = {"X-CDD-Token": self.apiKey}
 		response = requests.delete(URL, headers=headers)
 
-		# Check for errors:
-		assert (response.status_code == 200), response.json()
+		response.raise_for_status()
 		
 		return response.json()
 
