@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cdd_python_sdk"
-version = "1.0.5"
+version = "1.0.6"
 authors = [
   { name="Gerard Mattei", email="gerry.mattei@workflowinformatics.com" },
   { name="Ryan Moore", email="ryan.moore@workflowinformatics.com" }
